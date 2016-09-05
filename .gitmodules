@@ -1,0 +1,4 @@
+[submodule "tilecoding-submodule"]
+	path = tilecoding-submodule
+	url = git@github.com:rmoehn/tilecoding.git
+	branch = add-offset-option
