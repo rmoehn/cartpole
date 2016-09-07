@@ -8,7 +8,7 @@ from scipy import sparse
 import gym
 from tilecoding import representation
 
-def make_feature(ndivs, ntilings):
+def make_feature_vec(ndivs, ntilings):
     """
 
     Arguments:
@@ -38,7 +38,7 @@ def make_feature(ndivs, ntilings):
     state_inds_to_sparse = representation.IndexToBinarySparse(state_tc)
 
 
-    def feature_inner(state, action):
+    def feature_vec_inner(state, action):
         state_fv = state_inds_to_sparse(state) # fv … feature vector
         # Note: Normally it would look like this:
         #
@@ -61,4 +61,4 @@ def make_feature(ndivs, ntilings):
             return sparse.hstack([sparse.csr_matrix(state_fv.shape), state_fv],
                                  format='csr')
 
-    return feature_inner
+    return feature_vec_inner
