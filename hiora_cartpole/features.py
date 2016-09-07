@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import numpy as np
+from scipy import sparse
 
 import gym
 from tilecoding import representation
@@ -11,6 +12,8 @@ def make_feature(ndivs, ntilings):
     """
 
     Arguments:
+        ndivs    – (n_dim), number of divisions (in each tiling) for each of the
+                   four input dimensions
         ntilings - int, number of tilings
     """
     # For each dimension, one row of offsets per tiling.
@@ -24,7 +27,7 @@ def make_feature(ndivs, ntilings):
 
     state_tc = representation.TileCoding(
                    input_indices=[[0, 1, 2, 3]],
-                   ntiles=ndivs,
+                   ntiles=ndivs + [2],
                    ntilings=[ntilings],
                    state_range=np.array([cartpole.observation_space.low,
                                          cartpole.observation_space.high]),
@@ -32,13 +35,30 @@ def make_feature(ndivs, ntilings):
                    hashing=None,
                    bias_term=False)
 
-    action_vec = [np.array([-1]), np.array([0])] # This appears to be fastest.
-
-    state_action_tc = representation.ConcatStateAction(state_tc)
-    state_action_to_dense = representation.IndexToDense(state_action_tc)
+    state_inds_to_sparse = representation.IndexToBinarySparse(state_tc)
 
 
     def feature_inner(state, action):
-        return state_action_tc(state, action_vec[action])
+        state_fv = state_inds_to_sparse(state) # fv … feature vector
+        # Note: Normally it would look like this:
+        #
+        #  tiling   0       1       2
+        #  action = 0   1   0   1   0   1
+        #           |---|---|---|---|---|---
+        #
+        # Here it looks like this:
+        #
+        # tiling    0   1   2   0   1   2
+        # action =  0           1
+        #           |---|---|---|---|---|---
+        #
+        # For the scalar product and the weights, this shouldn't make a
+        # difference, though.
+        if action:
+            return sparse.hstack([state_fv, sparse.csr_matrix(state_fv.shape)],
+                                 format='csr')
+        else:
+            return sparse.hstack([sparse.csr_matrix(state_fv.shape), state_fv],
+                                 format='csr')
 
     return feature_inner
