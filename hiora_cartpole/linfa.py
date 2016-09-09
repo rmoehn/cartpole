@@ -6,7 +6,8 @@ import numpy as np
 import pyrsistent
 
 LinfaExperience = pyrsistent.immutable(
-                    'feature_vec, theta, E, epsi, alpha, lmbda, p_obs, p_act')
+                    'feature_vec, theta, E, epsi, alpha, lmbda, p_obs, p_act,' \
+                    ' act_space')
 
 
 # pylint: disable=too-many-arguments
@@ -39,9 +40,8 @@ def choose_action(e, o):
     if true_with_prob(e.epsi):
         return e.act_space.sample()
     else:
-        best_act, _ = max(xrange(e.act_space.n),
-                          key=lambda a: e.feature_vec(o, a))
-        return best_act
+        return max(xrange(e.act_space.n),
+                   key=lambda a: e.feature_vec(o, a).dot(e.theta)[0])
 
 
 def think(e, o, r, done=False):
@@ -62,11 +62,11 @@ def think(e, o, r, done=False):
         a     = None
         Qnext = 0
 
-    if e.p_obs: # Except for first timestep.
+    if e.p_obs is not None: # Except for first timestep.
         p_feat = e.feature_vec(e.p_obs, e.p_act)
         Qcur  = p_feat.dot(e.theta)
         delta = Qcur - (r + Qnext) # Yes, in the gradient it's inverted.
-        e.E.__iadd__(p_feat)
+        e.E[p_feat.indices] += 1.0
 
         # Note: Eligibility traces could be done slightly more succinctly by
         # scaling the feature vectors themselves. See Silver slides.
@@ -79,7 +79,7 @@ def think(e, o, r, done=False):
 
 def wrapup(e, o, r):
     e, _ = think(e, o, r, done=True)
-    return e.set(p_obs=None, p_act=None, E=np.zeros((e.n_weights)))
+    return e.set(p_obs=None, p_act=None, E=np.zeros(e.E.shape))
 
 
 def Q(e):
