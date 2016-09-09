@@ -7,7 +7,7 @@ import pyrsistent
 
 LinfaExperience = pyrsistent.immutable(
                     'feature_vec, theta, E, epsi, alpha, lmbda, p_obs, p_act,' \
-                    ' act_space')
+                    ' p_feat, act_space')
 
 
 # pylint: disable=too-many-arguments
@@ -29,6 +29,7 @@ def init(lmbda, alpha, epsi, feature_vec, n_weights, act_space):
                            lmbda=lmbda,
                            p_obs=None, # p … previous
                            p_act=None,
+                           p_feat=None,
                            act_space=act_space)
 
 
@@ -60,13 +61,13 @@ def think(e, o, r, done=False):
             # expected Q of next action
     else:
         a     = None
+        feat  = None
         Qnext = 0
 
     if e.p_obs is not None: # Except for first timestep.
-        p_feat = e.feature_vec(e.p_obs, e.p_act)
-        Qcur  = p_feat.dot(e.theta)
+        Qcur  = e.p_feat.dot(e.theta)
         delta = Qcur - (r + Qnext) # Yes, in the gradient it's inverted.
-        e.E[p_feat.indices] += 1.0
+        e.E[e.p_feat.indices] += 1.0
 
         # Note: Eligibility traces could be done slightly more succinctly by
         # scaling the feature vectors themselves. See Silver slides.
@@ -74,12 +75,12 @@ def think(e, o, r, done=False):
 
         e.E.__imul__(e.lmbda)
 
-    return e.set(p_obs=o, p_act=a), a
+    return e.set(p_obs=o, p_act=a, p_feat=feat), a
 
 
 def wrapup(e, o, r):
     e, _ = think(e, o, r, done=True)
-    return e.set(p_obs=None, p_act=None, E=np.zeros(e.E.shape))
+    return e.set(p_obs=None, p_act=None, p_feat=None, E=np.zeros(e.E.shape))
 
 
 def Q(e):
