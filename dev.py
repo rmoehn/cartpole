@@ -9,8 +9,6 @@ from hiora_cartpole import features
 import gym
 
 
-
-
 feature_vec = features.make_feature_vec([10, 10, 10, 10], 4)
 
 
@@ -28,20 +26,27 @@ experience = linfa.init(lmbda=0.3,
 
 env = cartpole
 
-for n_episode in range(10000):
-    observation = env.reset()
-    reward      = 0
-    done        = False
+# pylint: disable=redefined-outer-name
+def train(env, experience, n_episodes, max_steps, is_render=False):
+    steps_per_episode = np.zeros(n_episodes, dtype=np.int32)
 
-    for t in range(100):
-        experience, action = linfa.think(experience, observation, reward, done)
-        observation, reward, done, info = env.step(action)
+    for n_episode in xrange(n_episodes):
+        observation = env.reset()
+        reward      = 0
+        done        = False
 
-        if done:
-            print "Episode finished after {} timesteps".format(t+1)
-            experience = linfa.wrapup(experience, observation, reward)
-            break
+        for t in xrange(max_steps):
+            is_render and env.render() # pylint: disable=expression-not-assigned
+            experience, action = linfa.think(experience, observation, reward,
+                                             done)
+            observation, reward, done, _ = env.step(action)
 
-hard_earned_theta = np.copy(experience.theta)
+            if done:
+                steps_per_episode[n_episode] = t
+                experience = linfa.wrapup(experience, observation, reward)
+                break
 
-np.save("hard-earned-thetauuu", hard_earned_theta, allow_pickle=False)
+    return experience, steps_per_episode
+
+#hard_earned_theta = np.copy(experience.theta)
+#np.savez_compressed("hard-earned-theta", hard_earned_theta)
