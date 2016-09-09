@@ -11,7 +11,7 @@ LinfaExperience = pyrsistent.immutable(
 
 
 # pylint: disable=too-many-arguments
-def init(lmbda, alpha, epsi, feature_vec, n_weights, act_space):
+def init(lmbda, alpha, epsi, feature_vec, n_weights, act_space, theta=None):
     """
 
     Arguments:
@@ -21,8 +21,11 @@ def init(lmbda, alpha, epsi, feature_vec, n_weights, act_space):
         act_space   - the OpenAI gym.spaces.discrete.Discrete action space of
                       the problem
     """
+    if theta is None:
+        theta = np.zeros(n_weights)
+
     return LinfaExperience(feature_vec=feature_vec,
-                           theta=np.zeros(n_weights),
+                           theta=theta,
                            E=np.zeros(n_weights),
                            epsi=epsi,
                            alpha=alpha,
