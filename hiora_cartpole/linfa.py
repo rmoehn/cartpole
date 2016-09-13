@@ -15,8 +15,8 @@ def init(lmbda, alpha, epsi, feature_vec, n_weights, act_space, theta=None):
     """
 
     Arguments:
-        feature_vec - function mapping (observation, action) pairs to feature
-                      vectors
+        feature_vec - function mapping (observation, action) pairs to
+                      FeatureVecs
         n_weights   - number of weights == length of the feature vectors
         act_space   - the OpenAI gym.spaces.discrete.Discrete action space of
                       the problem
@@ -70,7 +70,7 @@ def think(e, o, r, done=False):
     if e.p_obs is not None: # Except for first timestep.
         Qcur  = e.p_feat.dot(e.theta)
         delta = Qcur - (r + Qnext) # Yes, in the gradient it's inverted.
-        e.E[e.p_feat.indices] += 1.0
+        e.p_feat.add_to(e.E)
 
         # Note: Eligibility traces could be done slightly more succinctly by
         # scaling the feature vectors themselves. See Silver slides.

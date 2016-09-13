@@ -8,6 +8,19 @@ from scipy import sparse
 import gym
 from tilecoding import representation
 
+class TileCodingFeatureVec(object):
+    def __init__(self, feature_vec):
+        self.feature_vec = feature_vec
+
+
+    def dot(self, vec):
+        return self.feature_vec.dot(vec)
+
+
+    def add_to(self, vec):
+        vec[self.feature_vec.indices] += 1.0
+
+
 def make_feature_vec(ndivs, ntilings):
     """
 
@@ -55,10 +68,14 @@ def make_feature_vec(ndivs, ntilings):
         # For the scalar product and the weights, this shouldn't make a
         # difference, though.
         if action:
-            return sparse.hstack([state_fv, sparse.csr_matrix(state_fv.shape)],
-                                 format='csr')
+            return TileCodingFeatureVec(
+                       sparse.hstack(
+                           [state_fv, sparse.csr_matrix(state_fv.shape)],
+                           format='csr'))
         else:
-            return sparse.hstack([sparse.csr_matrix(state_fv.shape), state_fv],
-                                 format='csr')
+            return TileCodingFeatureVec(
+                       sparse.hstack(
+                           [sparse.csr_matrix(state_fv.shape), state_fv],
+                           format='csr'))
 
     return feature_vec_inner

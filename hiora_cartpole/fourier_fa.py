@@ -6,6 +6,26 @@ import itertools
 
 import numpy as np
 
+class FourierFeatureVec(object):
+    def __init__(self, action, feature_vec):
+        self.feature_vec = feature_vec
+        self.slice = slice(action * feature_vec.shape[0],
+                           (action+1) * feature_vec.shape[0])
+
+
+    def dot(self, vec):
+        return np.dot(vec[self.slice], self.feature_vec)
+
+
+    def add_to(self, vec):
+        """
+
+        Warning: Modifies vec.
+        """
+        vec[self.slice] += self.feature_vec
+
+
+
 def make_feature_vec(state_ranges, order):
     """
 
@@ -18,15 +38,17 @@ def make_feature_vec(state_ranges, order):
      - http://psthomas.com/papers/Konidaris2011a.pdf
      - https://github.com/amarack/python-rl/blob/master/pyrl/basis/fourier.py
     """
-    n_dims    = state_ranges[1]
-    n_entries = (n_dims + 1)**order
+    n_dims    = state_ranges.shape[1]
+    n_entries = (order + 1)**n_dims
 
     # All entries from cartesian product {0, …, order+1}^n_dims.
     c_matrix = np.array(
                    list( itertools.product(range(order+1), repeat=n_dims) ),
                    dtype=np.int32)
 
-    def feature_vec_dot_inner(state, action, weights):
+    assert n_entries == c_matrix.shape[0] # Sanity check.
+
+    def feature_vec_dot_inner(state, action):
         """
 
         Arguments:
@@ -39,7 +61,7 @@ def make_feature_vec(state_ranges, order):
         # Bring all state input into the range [0, 1], the input range of the
         # Fourier basis functions.
         normalized_state = (state - state_ranges[0]) \
-                               / np.diff(state_ranges, axis=1)
+                               / np.diff(state_ranges, axis=0)
 
         # Dot products of the feature vector with every c. → shape (n_entries,)
         dot_prods = np.dot(c_matrix, normalized_state.transpose())[:,0]
@@ -48,7 +70,6 @@ def make_feature_vec(state_ranges, order):
         feature_v = np.cos(np.pi * dot_prods)
 
         # Sum up results, weighted, to give Fourier val.
-        return np.dot(weights[action * n_entries:(action + 1) * n_entries - 1],\
-                      feature_v)
+        return FourierFeatureVec(action, feature_v)
 
     return feature_vec_dot_inner
