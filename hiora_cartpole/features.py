@@ -14,7 +14,7 @@ class TileCodingFeatureVec(object):
 
 
     def dot(self, vec):
-        return self.feature_vec.dot(vec)
+        return self.feature_vec.dot(vec)[0]
 
 
     def add_to(self, vec):

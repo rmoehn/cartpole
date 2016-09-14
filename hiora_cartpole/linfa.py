@@ -45,7 +45,7 @@ def choose_action(e, o):
         return e.act_space.sample()
     else:
         return max(xrange(e.act_space.n),
-                   key=lambda a: e.feature_vec(o, a).dot(e.theta)[0])
+                   key=lambda a: e.feature_vec(o, a).dot(e.theta))
 
 
 def think(e, o, r, done=False):
