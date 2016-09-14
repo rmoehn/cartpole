@@ -8,6 +8,11 @@ import numpy as np
 
 import easytile.core as mut
 
+def feature_to_div_bounds(dim_ranges, n_tilings, n_divss, offsetss, feature):
+    indices = np.arange(feature.shape[0], dtype=np.int)[feature]
+    div_coords = np.unravel
+
+
 class NumpyTestCase(TestCase):
     def assertArrayEqual(self, a, b): # pylint: disable=no-self-use
         if not np.array_equal(a, b):

@@ -64,6 +64,8 @@ def raw_feature_fn(dim_ranges, n_tilings, n_divss, offsetss, state):
         shape: (n_tilings * product(n_divss))
     """
 
+    # TODO: Centered is misleading. We left-align the values at zero, but don't
+    # center them at zero.
     offset     = state - offsetss           # offset state for each tiling
     centered   = offset - dim_ranges[:, 0]  # subtract min values
     normalized = centered / np.diff(dim_ranges, axis=1)
