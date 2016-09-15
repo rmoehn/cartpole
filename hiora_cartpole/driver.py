@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import functools
 import itertools
 from itertools import imap, islice, izip, dropwhile
-import operator
 
 import numpy as np
 import pyrsistent
@@ -75,6 +74,10 @@ def make_train_and_prep(env, next_dtimestep, wrapup):
     return train_and_prep_inner
 
 
+def averages(numbers_iter, avg_window):
+    return imap(np.average, grouper(numbers_iter, avg_window))
+
+
 # pylint: disable=too-many-arguments, too-many-locals
 def train_until_converged(env, train_and_prep, init_experience,
         max_steps, max_episodes, avg_window, max_diff):
@@ -84,29 +87,30 @@ def train_until_converged(env, train_and_prep, init_experience,
     cnts_dtimesteps   = iterate(lambda (_, dt): train_and_prep_ms(dt),
                                 (0, first_dtimestep))
 
-    numbered_cnts_dtimesteps = izip(cnts_dtimesteps, itertools.count(0))
-    limited_cnts_dtimesteps  = islice(cnts_dtimesteps, max_episodes - 1)
-    cnts                     = imap(lambda (c, _): c, limited_cnts_dtimesteps)
+    numbered_cnts_dtimesteps = izip(itertools.count(0), cnts_dtimesteps)
+    cnts                     = imap(lambda (_, (c, d)):
+                                    c, numbered_cnts_dtimesteps)
+    limited_cnts             = islice(cnts, max_episodes - 1)
 
     # The underlying iterator is cnts_dtimesteps. The following will implicitly
     # consume cnts_timesteps until the difference between the averages of
     # adjacent groups falls below max_diff. Mutability is crazy, isn't it?
     next(
         dropwhile(lambda avg: avg >= max_diff,
-            imap(operator.sub,
+            imap(lambda (a1, a2): abs(a1 - a2),
                 pairwise(
-                    imap(np.average,
-                         grouper(cnts, avg_window)
-                    )
+                    averages(limited_cnts, avg_window)
                 )
             )
         ),
-        None
     )
 
     nr, cnt_dtimestep = next(numbered_cnts_dtimesteps)
+    approx_last_avg   = next( averages(cnts, avg_window) )
 
-    return nr, cnt_dtimestep[0], cnt_dtimestep[1]
+    return nr - 2 * avg_window, approx_last_avg, cnt_dtimestep[1].experience
+        # Subtracting, because it converges, but we only notices after we've
+        # compared the averages of the next two groups.
 
 
 
