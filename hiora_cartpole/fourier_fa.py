@@ -26,7 +26,7 @@ class FourierFeatureVec(object):
 
 
 
-def make_feature_vec(state_ranges, order):
+def make_feature_vec(state_ranges, n_acts, order):
     """
 
     Arguments:
@@ -72,4 +72,4 @@ def make_feature_vec(state_ranges, order):
         # Sum up results, weighted, to give Fourier val.
         return FourierFeatureVec(action, feature_v)
 
-    return feature_vec_dot_inner
+    return n_acts * n_entries, feature_vec_dot_inner

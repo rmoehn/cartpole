@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import operator
+
 import numpy as np
 from scipy import sparse
 
@@ -23,6 +25,9 @@ class TileCodingFeatureVec(object):
 
 def make_feature_vec(ndivs, ntilings):
     """
+
+
+    Note that this implementation works for the cart-pole environment only.
 
     Arguments:
         ndivs    – (n_dim), number of divisions (in each tiling) for each of the
@@ -49,6 +54,8 @@ def make_feature_vec(ndivs, ntilings):
                    bias_term=False)
 
     state_inds_to_sparse = representation.IndexToBinarySparse(state_tc)
+
+    n_weights = 2 * ntilings * reduce(operator.mul, ndivs)
 
 
     def feature_vec_inner(state, action):
@@ -78,4 +85,4 @@ def make_feature_vec(ndivs, ntilings):
                            [sparse.csr_matrix(state_fv.shape), state_fv],
                            format='csr'))
 
-    return feature_vec_inner
+    return n_weights, feature_vec_inner
