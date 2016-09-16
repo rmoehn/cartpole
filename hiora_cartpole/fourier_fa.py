@@ -8,9 +8,10 @@ import numpy as np
 
 class FourierFeatureVec(object):
     def __init__(self, action, feature_vec):
+        self.action      = action
         self.feature_vec = feature_vec
-        self.slice = slice(action * feature_vec.shape[0],
-                           (action+1) * feature_vec.shape[0])
+        self.slice       = slice(action * feature_vec.shape[0],
+                                 (action+1) * feature_vec.shape[0])
 
 
     def dot(self, vec):
@@ -23,6 +24,15 @@ class FourierFeatureVec(object):
         Warning: Modifies vec.
         """
         vec[self.slice] += self.feature_vec
+
+
+    def alphabounds_diffdot(self, prev, elig):
+        """
+
+        Credits: http://people.cs.umass.edu/~wdabney/papers/alphaBounds.pdf
+        """
+        return np.dot(elig[self.slice], self.feature_vec) \
+                   - np.dot(elig[prev.slice], prev.feature_vec)
 
 
 

@@ -6,12 +6,13 @@ import numpy as np
 import pyrsistent
 
 LinfaExperience = pyrsistent.immutable(
-                    'feature_vec, theta, E, epsi, alpha, lmbda, p_obs, p_act,' \
-                    ' p_feat, act_space')
+                    'feature_vec, theta, E, epsi, init_alpha, p_alpha, lmbda,'
+                    ' p_obs, p_act, p_feat, act_space')
 
 
 # pylint: disable=too-many-arguments
-def init(lmbda, alpha, epsi, feature_vec, n_weights, act_space, theta=None):
+def init(lmbda, init_alpha, epsi, feature_vec, n_weights, act_space,
+        theta=None):
     """
 
     Arguments:
@@ -28,7 +29,8 @@ def init(lmbda, alpha, epsi, feature_vec, n_weights, act_space, theta=None):
                            theta=theta,
                            E=np.zeros(n_weights),
                            epsi=epsi,
-                           alpha=alpha,
+                           init_alpha=init_alpha,
+                           p_alpha=init_alpha,
                            lmbda=lmbda,
                            p_obs=None, # p … previous
                            p_act=None,
@@ -62,10 +64,22 @@ def think(e, o, r, done=False):
         feat  = e.feature_vec(o, a)
         Qnext = feat.dot(e.theta)
             # expected Q of next action
+
+        # Credits: http://people.cs.umass.edu/~wdabney/papers/alphaBounds.pdf
+        # Note: The paper doesn't mention the case when the previous feature
+        # vector equals the current feature vector and gamma = 1. This case
+        # would lead to a division by zero. We return p_alpha in this case.
+        if e.p_feat:
+            diffdot = abs(feat.alphabounds_diffdot(e.p_feat, e.E)) \
+                          or 1.0/e.p_alpha
+            alpha = min(e.p_alpha, 1.0 / diffdot)
+        else:
+            alpha = e.p_alpha
     else:
         a     = None
         feat  = None
         Qnext = 0
+        alpha = e.p_alpha
 
     if e.p_obs is not None: # Except for first timestep.
         Qcur  = e.p_feat.dot(e.theta)
@@ -74,11 +88,11 @@ def think(e, o, r, done=False):
 
         # Note: Eligibility traces could be done slightly more succinctly by
         # scaling the feature vectors themselves. See Silver slides.
-        e.theta.__isub__(e.alpha * delta * e.E)
+        e.theta.__isub__(alpha * delta * e.E)
 
         e.E.__imul__(e.lmbda)
 
-    return e.set(p_obs=o, p_act=a, p_feat=feat), a
+    return e.set(p_alpha=alpha, p_obs=o, p_act=a, p_feat=feat), a
 
 
 def wrapup(e, o, r):
