@@ -81,6 +81,12 @@ def averages(numbers_iter, avg_window):
 # pylint: disable=too-many-arguments, too-many-locals
 def train_until_converged(env, train_and_prep, init_experience,
         max_steps, max_episodes, avg_window, max_diff):
+    """
+    Train until the rewards roughly stay the same
+
+    This is a crude heuristic and not a real convergence test.
+    """
+
     first_dtimestep   = DTimestep(env.reset(), 0, False, init_experience, None)
 
     train_and_prep_ms = functools.partial(train_and_prep, max_steps=max_steps)
@@ -112,6 +118,24 @@ def train_until_converged(env, train_and_prep, init_experience,
         # Subtracting, because it converges, but we only notices after we've
         # compared the averages of the next two groups.
 
+
+def cnts_dtimesteps_iter(env, train_and_prep, init_experience, max_steps):
+    first_dtimestep   = DTimestep(env.reset(), 0, False, init_experience, None)
+    train_and_prep_ms = functools.partial(train_and_prep, max_steps=max_steps)
+
+    return iterate(lambda (_, dt): train_and_prep_ms(dt), (0, first_dtimestep))
+
+
+def train_return_thetas(cnts_dtimesteps, n_episodes):
+    _, first_dtimestep = next(cnts_dtimesteps)
+
+    thetas = np.empty((n_episodes, first_dtimestep.experience.theta.shape[0]))
+    thetas[0] = first_dtimestep.experience.theta
+
+    for n_episode in xrange(1, n_episodes):
+        thetas[n_episode] = next(cnts_dtimesteps)[1].experience.theta
+
+    return thetas
 
 
 #def train(n_episodes, env, think, init_experience):
