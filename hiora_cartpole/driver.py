@@ -6,6 +6,10 @@ import functools
 import itertools
 from itertools import imap, islice, izip, dropwhile
 
+from mpl_toolkits.mplot3d import Axes3D # pylint: disable=unused-import
+import matplotlib
+matplotlib.use('GTK3Agg')
+from matplotlib import cm, pyplot
 import numpy as np
 import pyrsistent
 
@@ -137,6 +141,30 @@ def train_return_thetas(cnts_dtimesteps, n_episodes):
 
     return thetas
 
+
+def plot_2D_V(state_ranges, act_space, feature_vec, theta):
+    pos_range = np.linspace(state_ranges[0][0], state_ranges[1][0], 40)
+    vel_range = np.linspace(state_ranges[0][1], state_ranges[1][1], 40)
+    act_range = np.arange(act_space.n)
+
+    poss, vels, acts = np.meshgrid(pos_range, vel_range, act_range)
+
+    ustate_ranges = np.frompyfunc(
+                        lambda p, v, a: \
+                            feature_vec(np.array([p, v]), a).dot(theta),
+                        3, 1)
+
+    Qs = ustate_ranges(poss, vels, acts)
+    Vs = np.max(Qs, axis=2)
+
+    print poss[:,:,0].shape, vels[:,:,0].shape, Vs.shape
+
+    figure  = pyplot.figure(1)
+    axes    = figure.gca(projection='3d')
+    axes.plot_surface(poss[:,:,0], vels[:,:,0], Vs, rstride=1,
+                        cstride=1, cmap=cm.Greys,
+                        antialiased=False, linewidth=0)
+    pyplot.show()
 
 #def train(n_episodes, env, think, init_experience):
 #    dtimestep = DTimestep(env.reset(), 0, init_experience, None)
