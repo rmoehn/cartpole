@@ -7,12 +7,12 @@ import pyrsistent
 
 LinfaExperience = pyrsistent.immutable(
                     'feature_vec, theta, E, epsi, init_alpha, p_alpha, lmbda,'
-                    ' p_obs, p_act, p_feat, act_space')
+                    ' p_obs, p_act, p_feat, act_space, is_use_alpha_bounds')
 
 
 # pylint: disable=too-many-arguments
 def init(lmbda, init_alpha, epsi, feature_vec, n_weights, act_space,
-        theta=None):
+        theta=None, is_use_alpha_bounds=False):
     """
 
     Arguments:
@@ -35,7 +35,8 @@ def init(lmbda, init_alpha, epsi, feature_vec, n_weights, act_space,
                            p_obs=None, # p … previous
                            p_act=None,
                            p_feat=None,
-                           act_space=act_space)
+                           act_space=act_space,
+                           is_use_alpha_bounds=is_use_alpha_bounds)
 
 
 def true_with_prob(p):
@@ -69,7 +70,7 @@ def think(e, o, r, done=False):
         # Note: The paper doesn't mention the case when the previous feature
         # vector equals the current feature vector and gamma = 1. This case
         # would lead to a division by zero. We return p_alpha in this case.
-        if e.p_feat:
+        if e.is_use_alpha_bounds and e.p_feat:
             diffdot = abs(feat.alphabounds_diffdot(e.p_feat, e.E)) \
                           or 1.0/e.p_alpha
             alpha = min(e.p_alpha, 1.0 / diffdot)
