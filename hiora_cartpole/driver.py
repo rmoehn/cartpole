@@ -41,6 +41,34 @@ DTimestep = pyrsistent.immutable(
                 name='DTimestep')
 
 
+# pylint: disable=too-many-arguments
+def train(env, learner, experience, n_episodes, max_steps, is_render=False):
+    steps_per_episode = np.zeros(n_episodes, dtype=np.int32)
+    alpha_per_episode = np.empty(n_episodes)
+
+    for n_episode in xrange(n_episodes):
+        observation = env.reset()
+        reward      = 0
+        done        = False
+
+        for t in xrange(max_steps):
+            is_render and env.render() # pylint: disable=expression-not-assigned
+            experience, action = learner.think(experience, observation, reward,
+                                               done)
+            observation, reward, done, _ = env.step(action)
+
+            if done:
+                steps_per_episode[n_episode] = t
+                alpha_per_episode[n_episode] = experience.p_alpha
+                experience = learner.wrapup(experience, observation, reward)
+                break
+        else:
+            steps_per_episode[n_episode] = max_steps
+            alpha_per_episode[n_episode] = experience.p_alpha
+
+    return experience, steps_per_episode, alpha_per_episode
+
+
 def make_next_dtimestep(env, think):
     def next_dtimestep_inner(dtimestep):
         if dtimestep.done:
