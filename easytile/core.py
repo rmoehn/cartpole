@@ -7,7 +7,7 @@ from unittest import TestCase
 
 import numpy as np
 
-def check_args(dim_ranges, n_tilings, n_divss, offsetss):
+def check_args(dim_ranges, dim_widths, n_tilings, n_divss, offsetss):
     tc = TestCase('__init__')
 
     n_dim = dim_ranges.shape[0]
@@ -15,13 +15,14 @@ def check_args(dim_ranges, n_tilings, n_divss, offsetss):
     tc.assertEqual(tuple([n_dim]),     n_divss.shape)
     tc.assertEqual((n_tilings, n_dim), offsetss.shape)
 
-    div_widths = np.diff(dim_ranges, axis=1) / (n_divss - 1)
+    div_widths = dim_widths / (n_divss - 1)
 
-    assert all(-div_widths < offsetss), "Offsets must be less than division widths."
-    assert all(offsetss <= 0), "Offsets must be <= 0."
+    assert np.all(-offsetss < div_widths), \
+           "Offsets must be less than division widths."
+    assert np.all(offsetss <= 0), "Offsets must be <= 0."
 
 
-def raw_feature_fn(dim_ranges, n_tilings, n_divss, offsetss, state):
+def raw_feature_fn(dim_ranges, dim_widths, n_divss, offsetss, state):
     """
 
     Note with example::
@@ -49,8 +50,8 @@ def raw_feature_fn(dim_ranges, n_tilings, n_divss, offsetss, state):
 
 
     Arguments:
-        dim_ranges – shape: (n_dim, 2) (min and max value for each dimension)
-        n_tilings  – int > 0
+        dim_ranges – shape: (2, n_dim) (min and max value for each dimension)
+        n_tilings  – == offsetss.shape[0]
         n_divss    – shape: (n_dim)
                      (number of divisions for each dimension (same for all
                      tilings), for each dimension: div_width = (max - min) /
@@ -67,24 +68,20 @@ def raw_feature_fn(dim_ranges, n_tilings, n_divss, offsetss, state):
     # TODO: Centered is misleading. We left-align the values at zero, but don't
     # center them at zero.
     offset     = state - offsetss           # offset state for each tiling
-    centered   = offset - dim_ranges[:, 0]  # subtract min values
-    normalized = centered / np.diff(dim_ranges, axis=1)
-                                            # divide by space width
+    centered   = offset - dim_ranges[0]     # subtract min values
+    normalized = centered / dim_widths      # divide by space width
     scaled     = normalized * (n_divss - 1) # distribute over divisions
     div_coords = scaled.astype(np.int)      # floor to get division coords
     indices    = np.ravel_multi_index( div_coords.transpose(), n_divss )
         # transform multi-dimensional coordinates to scalar tile indices
 
-    res = np.zeros(n_tilings * np.product(n_divss), dtype=np.bool)
-    res[ np.array(indices) ] = 1
-        # Turn on features indicated by indices.
-    return res
+    return indices
 
 
 def make_feature_fn(dim_ranges, n_tilings, n_divss, offsetss):
-    args = (np.array(dim_ranges), n_tilings, np.array(n_divss),
-            np.array(offsetss))
+    dim_widths = np.diff(dim_ranges, axis=0)
 
-    check_args(*args)
+    check_args(dim_ranges, dim_widths, n_tilings, n_divss, offsetss)
 
-    return functools.partial(raw_feature_fn, *args)
+    return functools.partial(raw_feature_fn, dim_ranges, dim_widths, n_divss,
+                             offsetss)
