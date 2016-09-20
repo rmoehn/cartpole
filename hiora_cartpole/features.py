@@ -36,7 +36,7 @@ def make_feature_vec(state_ranges, n_acts, ndivs, ntilings):
     """
     n_dim = state_ranges.shape[1]
     # For each dimension, one row of offsets per tiling.
-    # Note: if you use np.random.random, you don't need the reshape.
+    # Note: if you use np.random.rand, you don't need the reshape.
     unscaled_offsets = np.random.random_sample(n_dim * ntilings)\
                            .reshape((n_dim, ntilings))
     # unscaled_offsets are from interval [0, 1[. Make them smaller than the
