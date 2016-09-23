@@ -7,12 +7,13 @@ import pyrsistent
 
 LinfaExperience = pyrsistent.immutable(
                     'feature_vec, theta, E, epsi, init_alpha, p_alpha, lmbda,'
-                    ' p_obs, p_act, p_feat, act_space, is_use_alpha_bounds')
+                    ' p_obs, p_act, p_feat, act_space, is_use_alpha_bounds,'
+                    ' map_obs')
 
 
 # pylint: disable=too-many-arguments
 def init(lmbda, init_alpha, epsi, feature_vec, n_weights, act_space,
-        theta=None, is_use_alpha_bounds=False):
+        theta=None, is_use_alpha_bounds=False, map_obs=lambda x: x):
     """
 
     Arguments:
@@ -36,7 +37,8 @@ def init(lmbda, init_alpha, epsi, feature_vec, n_weights, act_space,
                            p_act=None,
                            p_feat=None,
                            act_space=act_space,
-                           is_use_alpha_bounds=is_use_alpha_bounds)
+                           is_use_alpha_bounds=is_use_alpha_bounds,
+                           map_obs=map_obs)
 
 
 def true_with_prob(p):
@@ -59,6 +61,8 @@ def think(e, o, r, done=False):
         o … observation
         r … reward
     """
+
+    o = e.map_obs(o)
 
     if not done:
         a     = choose_action(e, o) # action
@@ -97,6 +101,7 @@ def think(e, o, r, done=False):
 
 
 def wrapup(e, o, r):
+    o    = e.map_obs(o)
     e, _ = think(e, o, r, done=True)
     return e.set(p_obs=None, p_act=None, p_feat=None, E=np.zeros(e.E.shape))
 
