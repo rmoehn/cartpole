@@ -69,6 +69,32 @@ def train(env, learner, experience, n_episodes, max_steps, is_render=False):
     return experience, steps_per_episode, alpha_per_episode
 
 
+def greedy_act(e, o):
+    return max(xrange(e.act_space.n),
+               key=lambda a: e.feature_vec(o, a).dot(e.theta))
+
+
+def exec_greedy(env, experience, n_episodes, max_steps, is_render=False):
+    steps_per_episode = np.zeros(n_episodes, dtype=np.int32)
+
+    for n_episode in xrange(n_episodes):
+        observation = env.reset()
+        done        = False
+        t           = 0
+
+        for t in xrange(max_steps):
+            is_render and env.render() # pylint: disable=expression-not-assigned
+            action                  = greedy_act(experience, observation)
+            observation, _, done, _ = env.step(action)
+
+            if done:
+                break
+
+        steps_per_episode[n_episode] = t
+
+    return steps_per_episode
+
+
 def make_next_dtimestep(env, think):
     def next_dtimestep_inner(dtimestep):
         if dtimestep.done:
