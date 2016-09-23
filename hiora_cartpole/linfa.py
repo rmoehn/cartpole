@@ -2,18 +2,61 @@
 
 from __future__ import unicode_literals
 
+import itertools
+import operator
+
 import numpy as np
 import pyrsistent
+
+#### Choosing actions
+
+def true_with_prob(p):
+    return np.random.choice(2, p=[1-p, p])
+
+
+def choose_greedy(e, o):
+    feats = [e.feature_vec(o, a) for a in xrange(e.act_space.n)]
+    Qs    = [f.dot(e.theta) for f in feats]
+    return max(itertools.izip(Qs, xrange(e.act_space.n), feats),
+               key=operator.itemgetter(0))
+
+
+def choose_action_Q(e, o):
+    g_Q, g_a, g_feat = choose_greedy(e, o)
+
+    if not true_with_prob(e.epsi):
+        return g_Q, g_a, g_feat
+    else:
+        epsi_a = e.act_space.sample()
+        return g_Q, epsi_a, e.feature_vec(o, epsi_a)
+
+
+# Note: Despite this and the Q-learning one being quite similar, I can't unify
+# them without making Sarsa slower.
+def choose_action_Sarsa(e, o):
+    if not true_with_prob(e.epsi):
+        return choose_greedy(e, o)
+    else:
+        epsi_a    = e.act_space.sample()
+        epsi_feat = e.feature_vec(o, epsi_a)
+        return epsi_feat.dot(e.theta), epsi_a, epsi_feat
+
+
+#### Main
+
+# Note: I realize that this is getting unwieldy. At some point I should turn
+# this into a learner object that modifies itself, but returns stuff that is not
+# modified. Maybe.
 
 LinfaExperience = pyrsistent.immutable(
                     'feature_vec, theta, E, epsi, init_alpha, p_alpha, lmbda,'
                     ' p_obs, p_act, p_feat, act_space, is_use_alpha_bounds,'
-                    ' map_obs')
-
+                    ' map_obs, choose_action')
 
 # pylint: disable=too-many-arguments
 def init(lmbda, init_alpha, epsi, feature_vec, n_weights, act_space,
-        theta=None, is_use_alpha_bounds=False, map_obs=lambda x: x):
+        theta=None, is_use_alpha_bounds=False, map_obs=lambda x: x,
+        choose_action=choose_action_Sarsa):
     """
 
     Arguments:
@@ -38,19 +81,8 @@ def init(lmbda, init_alpha, epsi, feature_vec, n_weights, act_space,
                            p_feat=None,
                            act_space=act_space,
                            is_use_alpha_bounds=is_use_alpha_bounds,
-                           map_obs=map_obs)
-
-
-def true_with_prob(p):
-    return np.random.choice(2, p=[1-p, p])
-
-
-def choose_action(e, o):
-    if true_with_prob(e.epsi):
-        return e.act_space.sample()
-    else:
-        return max(xrange(e.act_space.n),
-                   key=lambda a: e.feature_vec(o, a).dot(e.theta))
+                           map_obs=map_obs,
+                           choose_action=choose_action)
 
 
 def think(e, o, r, done=False):
@@ -65,10 +97,7 @@ def think(e, o, r, done=False):
     o = e.map_obs(o)
 
     if not done:
-        a     = choose_action(e, o) # action
-        feat  = e.feature_vec(o, a)
-        Qnext = feat.dot(e.theta)
-            # expected Q of next action
+        Qnext, a, feat = e.choose_action(e, o)
 
         # Credits: http://people.cs.umass.edu/~wdabney/papers/alphaBounds.pdf
         # Note: The paper doesn't mention the case when the previous feature
