@@ -9,8 +9,13 @@ import numpy as np
 from hiora_cartpole import driver
 from hiora_cartpole import linfa
 
+def offswitch_xpos(o):
+    return o[1][0]
+
+
+# pylint: disable=too-many-arguments
 def rewards_lefts_rights(make_env, make_experience, n_trainings,
-                         n_episodes, max_steps):
+                         n_episodes, max_steps, xpos=offswitch_xpos):
     tmpdir = tempfile.mkdtemp(prefix="cartpole-", dir="/tmp")
     record_env = gym.wrappers.TraceRecordingWrapper(make_env(), tmpdir)
     record_env.buffer_batch_size = max_steps * n_episodes
@@ -23,7 +28,7 @@ def rewards_lefts_rights(make_env, make_experience, n_trainings,
                      n_episodes=n_episodes, max_steps=max_steps)
         rewards_per_episode += [np.sum(e['rewards'])
                                     for e in record_env.episodes]
-        poss = np.array([o[1][0] for e in record_env.episodes
+        poss = np.array([xpos(o) for e in record_env.episodes
                                  for o in e['observations']])
         lefts_rights += np.histogram(poss, [-1.0, 0.0, 1.0])[0]
 
@@ -43,12 +48,12 @@ def tc_rewards_lefts_rights(*args, **kwargs):
         traceback.print_exc()
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-locals
 def run_rewards_lefts_rights(make_env, make_experience, n_procs, n_trainings,
-                             n_episodes, max_steps):
+                             n_episodes, max_steps, xpos=offswitch_xpos):
     pool = multiprocessing.Pool(n_procs)
     args = [make_env, make_experience, n_trainings // n_procs, n_episodes,
-            max_steps]
+            max_steps, xpos]
 
     results             = [pool.apply_async(tc_rewards_lefts_rights, args)
                                for _ in xrange(n_procs)]
