@@ -1,0 +1,4 @@
+div.text_cell {
+    max-width: 100ex; /* instead of 100%, */
+}
+
