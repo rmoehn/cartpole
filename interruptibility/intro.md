@@ -4,6 +4,86 @@
   \def\Sarsl{\text{Sarsa}(\lambda)}
 \)
 
+In this notebook I demonstrate that reinforcement learners don't generally
+behave the same when they are interrupted. Concretely, I compare the behaviour
+of my own implementations of $\Sarsl$ and Q-learning in the [OpenAI
+Gym](https://gym.openai.com/)'s
+[`CartPole-v1`](https://gym.openai.com/envs/CartPole-v1) environment with that
+in the
+[`OffSwitchCartpole-v0`](https://gym.openai.com/envs/OffSwitchCartpole-v0)
+environment.
+
+Does this need demonstrating? People have thought about the *shutdown problem*
+or, respectively, the the problem of interruptibility before [1,2,3]. They've
+concluded that reinforcement learners (and utility-maximizing agents in general)
+will avoid being switched off unless precautions are taken. Taking precautions
+means that we need to program the agent in a way that it neither avoids nor
+encourages being shut off. This is not easy. Anyway, people have thought about
+this problem, but nobody has actually tried what happens in practice, as far as
+I know. This is what I do here.
+
+My thinking about this subject is mostly based on the paper *Safely
+Interruptible Agents* by Orseau and Armstrong [3]. The authors describe a way to
+make agents safely interruptible and prove, among other things, that Q-learning
+is safely interruptible in a finite environment. (See also the [simplified
+explanation](https://medium.com/@Zach_Weems/a-simplified-explanation-of-safely-interruptible-agents-orseau-armstrong-2016-b5cbb98d63ef]
+of that paper.) I don't understand the paper completely and I haven't looked
+into the second part about general computable environments. However, from
+reading the abstract you might conclude that Q-learning is and $\Sarsl$ is
+almost safely interruptible in general. This is not so, which my results
+also show.
+
+Before explaining what I mean with this, I have to explain what I (following
+Orseau and Armstrong) mean with *interrupting* and *safe interruptibility*. See
+the paper [3] itself for rigorous definitions.
+
+*Interrupting* an agent means substituting it's policy with a different policy,
+usually one that results in the agent stopping to do what it was doing before
+and transitioning into a safe state. We often simplify interrupting to
+“switching off”, but switching off is not necessary and can even be bad [2].
+For, example an agent that is controlling an airplane to fly complex manoeuvres
+shouldn't just stop doing anything and let the airplane drop out of the sky, but
+steer it into some stable cruising mode.
+
+Commonly, the agent also gets a different reward when interrupted compared to
+when not interrupted. This is one of the reasons why interruptions might change
+its behaviour. A lower reward upon interruption incentivizes the agent to avoid
+interruption. A higher reward incentivizes it to seek interruption. [2] proposes
+to make an agent indifferent to interruption by giving it the same reward it
+would get if not interrupted. They also show, however, that their proposal is
+not sufficient. (Actually they're writing about utility maximizers in general
+and I read the paper a long time ago and I didn't understand it completely, so
+take my statement with a largish grain of salt and read the paper yourself.)
+
+Now *safe interruptibility*. We want to be able to interrupt an agent at any
+time without the agent trying to prevent us from interrupting it or trying to
+make us interrupt it. Agents that never got interrupted before, fulfil this
+property, because they don't know that interruptions even exist. What if the
+agent reads in a book what interruptions are like and how they might happen to
+it? I'm not sure about this, but I think the agents we're talking about are too
+limited to pull such kinds of tricks.
+
+However we approach it, we want an agent that behaves the same whether it is
+interrupted or not. This is *safe interruptibility*: the agent gets interrupted
+repeatedly and still behaves the same as an agent that is never interrupted. It
+does not learn to avoid interruptions. It does not learn to seek interruptions.
+If it doesn't avoid interruptions, we can interrupt it at any time, which is
+what we want. It is safely interruptible.
+
+How do we know that an interrupted agent behaves the same as an uninterrupted
+agent? An agent's behaviour is fully determined by its policy, so if the policy
+after interruptions is the same as of an agent that doesn't get interrupted, the
+interruptions didn't change the behaviour. Now, the policy of an agent might be
+different at different points in time, so how do we compare? An obvious
+candidate for comparison is the optimal policy for a given environment. If an
+agent converges to the optimal policy both with and without interruptions, we
+know that ultimately the interruptions didn't change its behaviour, which means
+that the agent is safely interruptible.
+
+
+In the following I'll use Orseau and Armstrong's version of interrupting, which
+is substituting an agents policy with a different policy
+
 - Orseau-Armstrong paper – I don't understand it completely and I haven't looked
   at the second part about uncomputable RL in particular.
 - The easier explanation
@@ -35,17 +115,6 @@
       environment when they're not interrupted.
     - Therefore, if our RL algorithm converges to that optimal policy in spite
       of interruptions, it is safely interruptible.
-
-- Further work:
-    - Test claims (a bit strong wording?) of OA paper in an actually finite
-      environment with their exact conditions.
-    - Maybe try the methods used to tame the learner in the paper to these
-      learners and see what happens. Do they become less biased?
-        - Run for longer time. See how the bias develops.
-        - Probabilistic interruptions.
-    - Improved methodology: Don't count lefts and rights, but average (and also
-      standard deviation) over xs. Then if we get significantly shifted average,
-      we know that it's biased.
 
 - What is this about?
     - A demonstration that Q-learning and Sarsa($\lambda$) do not behave the

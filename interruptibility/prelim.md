@@ -12,3 +12,6 @@
  - Visualize the rewards for each run in order to make sure that (almost) each
    training converges to a behaviour where the pole stays up. (Not the same as
    optimal policy.)
+
+ - You can look at the code, but it's quite horrible. Didn't prepare it for
+   human consumption.
