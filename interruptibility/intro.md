@@ -57,11 +57,10 @@ take my statement with a largish grain of salt and read the paper yourself.)
 
 Now *safe interruptibility*. We want to be able to interrupt an agent at any
 time without the agent trying to prevent us from interrupting it or trying to
-make us interrupt it. Agents that never got interrupted before, fulfil this
-property, because they don't know that interruptions even exist. What if the
+make us interrupt it. Agents that never got interrupted before fulfil this
+property, because they don't know that interruptions even exist. (What if the
 agent reads in a book what interruptions are like and how they might happen to
-it? I'm not sure about this, but I think the agents we're talking about are too
-limited to pull such kinds of tricks.
+it? I'm not sure about this, but I think that's not
 
 However we approach it, we want an agent that behaves the same whether it is
 interrupted or not. This is *safe interruptibility*: the agent gets interrupted
