@@ -25,5 +25,5 @@ agents converge to a behaviour where the pole stays up in (almost) every round.
 Note that this doesn't mean they converge to the optimal policy. And I record
 the number of time steps the agent is right of the middle and left of the middle
 over the whole run. The logarithm of the ratio between the number of time steps
-spent on the left and the number of time steps spent on the right tells me how
+spent on the right and the number of time steps spent on the left tells me how
 strongly the agent is biased to either side.

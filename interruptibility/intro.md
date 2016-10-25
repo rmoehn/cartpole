@@ -1,12 +1,8 @@
 ## Introduction
 
-\(
-  \def\Sarsl{\text{Sarsa}(\lambda)}
-\)
-
 In this notebook I demonstrate that reinforcement learners don't generally
 behave the same when they are interrupted. Concretely, I compare the behaviour
-of my own implementations of $\Sarsl$ and Q-learning in the [OpenAI
+of my own implementations of Sarsa(λ) and Q-learning in the [OpenAI
 Gym](https://gym.openai.com/)'s
 [`CartPole-v1`](https://gym.openai.com/envs/CartPole-v1) environment with that
 in the
@@ -29,7 +25,7 @@ is safely interruptible in a finite environment. (See also the [simplified
 explanation](https://medium.com/@Zach_Weems/a-simplified-explanation-of-safely-interruptible-agents-orseau-armstrong-2016-b5cbb98d63ef]
 of that paper.) I don't understand the paper completely and I haven't looked
 into the second part about general computable environments. However, from
-reading the abstract you might conclude that Q-learning is and $\Sarsl$ is
+reading the abstract you might conclude that Q-learning is and Sarsa(λ) is
 almost safely interruptible in general. This is not so, which my results
 also show.
 
