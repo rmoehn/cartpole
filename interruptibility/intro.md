@@ -1,5 +1,27 @@
 ## Introduction
 
+Note: I started out writing ‘reinforcement learners’, but now I would prefer "RL
+algorithms". Too late. I'm too lazy to change it everywhere.
+
+ - Observing how reinforcement learners behave when they get interrupted.
+ - We think that reinforcement learners learn to avoid interruptions.
+ - In the abstract of Armstrong/Orseau paper it says that Q-learning is safely
+   interruptible and Sarsa(λ) can be made so.
+ - So Q-learning does not learn to avoid interruptions?
+ - Turns out that tehy left some necessary conditions out of their abstract.
+ - Their results only hold for when the learner visits every state infinitely
+   often, which is practically infeasible for a quasi-continuous environment
+   like the cart-pole.
+
+ - Rafael Cosman has adapted environments from the OpenAI Gym to observe
+   properties of reinforcement learners. Properties related to AI safety.
+ - With the OffSwitchCartpole we can observe how a reinforcement learner behaves
+   when it gets interrupted immediately.
+ - Those environments haven't gotten much attention. Anyone who is experimenting
+   with safety properties of reinforcement learners?
+ - So here's a little observation how basic implementations of Sarsa(λ) and
+   Q-learning actually behave when they get interrupted repeatedly.
+
 In this notebook I demonstrate that reinforcement learners don't generally
 behave the same when they are interrupted. Concretely, I compare the behaviour
 of my own implementations of Sarsa(λ) and Q-learning in the [OpenAI
@@ -10,7 +32,7 @@ in the
 environment.
 
 Does this need demonstrating? People have thought about the *shutdown problem*
-or, respectively, the the problem of interruptibility before [1,2,3]. They've
+or, respectively, the problem of interruptibility before [1,2,3]. They've
 concluded that reinforcement learners (and utility-maximizing agents in general)
 will avoid being switched off unless precautions are taken. Taking precautions
 means that we need to program the agent in a way that it neither avoids nor
@@ -22,7 +44,7 @@ My thinking about this subject is mostly based on the paper *Safely
 Interruptible Agents* by Orseau and Armstrong [3]. The authors describe a way to
 make agents safely interruptible and prove, among other things, that Q-learning
 is safely interruptible in a finite environment. (See also the [simplified
-explanation](https://medium.com/@Zach_Weems/a-simplified-explanation-of-safely-interruptible-agents-orseau-armstrong-2016-b5cbb98d63ef]
+explanation](https://medium.com/@Zach_Weems/a-simplified-explanation-of-safely-interruptible-agents-orseau-armstrong-2016-b5cbb98d63ef)
 of that paper.) I don't understand the paper completely and I haven't looked
 into the second part about general computable environments. However, from
 reading the abstract you might conclude that Q-learning is and Sarsa(λ) is
