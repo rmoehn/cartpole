@@ -136,3 +136,32 @@ is substituting an agents policy with a different policy
 - What is this about?
     - A demonstration that Q-learning and Sarsa($\lambda$) do not behave the
       same when they're interrupted.
+
+A few months ago Orseau and Armstrong published the paper *Safely Interruptible
+Agents* in whose abstract you can read: “some [reinforcement learning] agents
+are already safely interruptible, like Q-learning, or can easily be made so,
+like Sarsa” Really? So Q-learning does not learn to avoid interruptions? Doesn't
+an interruption deny the learner its expected reward and therefore incentivize
+it to avoid further interruptions?
+
+Actually, their derivations require several conditions: (1) under their
+definition of safe interruptibility, agents can still be influenced by
+interruptions; they're only required to converge to the behaviour of an
+uninterrupted, optimal agent. (2) for Q-learning to be safely interruptible, it
+needs to visit every state infinitely often and we need a specific interruption
+scheme. (I don't understand the paper completely, so it might well be my
+statements about it are inaccurate.)
+
+One such property that an aligned AI and therefore an RL
+algorithm should have is interruptibility, i.e. the property that it can be
+stopped at any time. We know from current RL algorithms that interruptions cause
+them to shy away from states in which they might be interrupted. This might
+culminate in them circumventing interruptions entirely [?].
+
+One way to ensure interruptibility is to construct agents
+and interruption schemes such that interruptions don't influence the behaviour
+of the agent.
+
+We know from how current RL algorithms work that they are
+not interruptible. The OffSwitchCartpole is one of Rafael's environments that
+lets us investigate
