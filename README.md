@@ -1,6 +1,7 @@
 # Sarsa(λ) and Q-learning on the interrupted and uninterrupted cart-pole
 
-See [this Jupyter Notebook](notebooks/ProcessedOSCP.ipynb) in order to
+See [this Jupyter
+Notebook](https://nbviewer.jupyter.org/url/cloj.de/cartpole.ipynb) in order to
 find out what this is about.
 
 Other potentially useful stuff in this repo:
