@@ -9,9 +9,14 @@ what I expected. I see two ways to go further with this.
    here) and they require interruptions to happen in a certain way. One could
    construct environments and agents that fulfil those requirements and see,
    using methods similar to this notebook's, how the theoretical claims
-   translate to reality.
+   translate to reality. (Technically, the environment doesn't need to be
+   finite. But since the learner has to visit every state infinitely often, I
+   guess that in practice, interrupted learners would only converge to the
+   optimal “uninterrupted” policy if the state space was small. Or maybe their
+   results are purely theoretical and not achievable in practice? Not sure how
+   to understand it.)
 
- * The goal is to construct agent that are safely interruptible in continuous
+ * The goal is to construct agents that are safely interruptible in continuous
    environments as well. People can try to construct such agents and observe
    them in the same cart-pole environments that I used. I don't know if this
    makes sense, but one could just try using the special conditions from the
@@ -20,9 +25,9 @@ what I expected. I see two ways to go further with this.
 
 Both ways can benefit from improving on the methods I use in this notebook:
 
+ * Run for a longer time and see how the bias develops.
+ * Plot bias over time. By marking the times when interruptions happen, one
+   could visualize how they impact the learner.
  * Don't measure the bias by counting lefts and rights, but by recording the
    position of the cart at each timestep, then averaging and calculating
    standard deviation.
- * Plot bias over time. By incorporating the interruptions, one could visualize
-   how they impact the learner.
- * Run for a longer time and see how the bias develops.

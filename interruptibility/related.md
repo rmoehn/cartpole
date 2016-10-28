@@ -5,15 +5,16 @@ and [6].
 a similar focus, but doesn't suggest experiments. Both don't mention
 interruptibility, perhaps because it is a more theoretical consideration:
 
-> [W]e study the shutdown problem not because we expect to use these techniques
-> to literally install a shutdown button in a physical agent, but rather as toy
-> models through which to gain a better understanding of how to avert
-> undesirable incentives that intelligent agents would experience by default.
+> […] we study the shutdown problem not because we expect to use these
+> techniques to literally install a shutdown button in a physical agent, but
+> rather as toy models through which to gain a better understanding of how to
+> avert undesirable incentives that intelligent agents would experience by
+> default.
 
-This is from [2], in which the authors present some approaches to solving the
-shutdown problem (of which interruptibility is a sub-problem), but conclude that
-they're not sufficient. [3] by Orseau and Armstrong is the newest paper on
-interruptibility and in its abstract one can read: ‘some [reinforcement
+This long sentence is from [2], in which the authors present some approaches to
+solving the shutdown problem (of which interruptibility is a sub-problem), but
+conclude that they're not sufficient. [3] by Orseau and Armstrong is the newest
+paper on interruptibility and in its abstract one can read: ‘some [reinforcement
 learning] agents are already safely interruptible, like Q-learning, or can
 easily be made so, like Sarsa’. Really? So Q-learning does not learn to avoid
 interruptions? Doesn't an interruption deny the learner its expected reward and
@@ -24,8 +25,8 @@ definition of safe interruptibility, agents can still be influenced by
 interruptions; they're only required to *converge* to the behaviour of an
 uninterrupted, optimal agent. (2) for Q-learning to be safely interruptible, it
 needs to visit every state infinitely often and we need a specific interruption
-scheme. (I don't understand the paper completely, so it might well be my
-statements about it are inaccurate.)
+scheme. (I don't understand the paper completely, so my statements about it
+might be inaccurate.)
 
 We see that possible solutions to the problem of interruptibility are still
 fairly theoretical and not applicable to real-world RL systems. What we can do
