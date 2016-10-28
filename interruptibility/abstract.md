@@ -6,8 +6,8 @@ repeatedly. My goal was to take this theoretical result and find out what
 happens in practice. For that I ran Sarsa(λ) and Q-learning in the cart-pole
 environment and observed how their behaviour changes when they get interrupted
 everytime the cart moves more than $1.0$ units to the right. In my primitive
-scenario, Sarsa(λ) spends roughly four times as many timesteps on the left of
-the centre when interrupted compared to when not, Q-learning roughly three
+scenario, Sarsa(λ) spends 4-6 times as many timesteps on the left of
+the centre when interrupted compared to when not, Q-learning 2-3
 times. In other words, interruptions noticeably influence the behaviour of
 Sarsa(λ) and Q-learning. More theoretical work to prevent that is underway, but
 further theoretical and practical investigations are welcome.
