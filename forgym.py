@@ -59,7 +59,7 @@ experience0 = linfa.init(lmbda=0.9,
                          map_obs=functools.partial(gym_tools.warning_clip_obs, ranges=state_ranges),
                          choose_action=linfa.choose_action_Sarsa)
 
-n_episodes = 2000
+n_episodes = 200
 
 #np.random.seed(42)
 
@@ -67,7 +67,8 @@ if args.is_monitored:
     env0.monitor.start("/tmp/cartpole-experiment-1", force=True)
 
 experience0, steps_per_episode0, alpha_per_episode0, observations0, actions0 \
-    = driver.train(env0, linfa, experience0, n_episodes=n_episodes, max_steps=200, is_render=False)
+    = driver.train(env0, linfa, experience0, n_episodes=n_episodes,
+            max_steps=200, is_render=False, is_wrapup_at_max_steps=False)
 
 if args.is_monitored:
     env0.monitor.close()
