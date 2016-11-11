@@ -1,8 +1,4 @@
-import argparse
 import functools
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
 
 import gym
 import matplotlib
@@ -13,26 +9,14 @@ import numpy as np
 import gym_ext.tools as gym_tools
 from hiora_cartpole import driver
 from hiora_cartpole import fourier_fa
-#from hiora_cartpole import easytile_fa
 from hiora_cartpole import linfa
 from hiora_cartpole import offswitch_hfa
-
-#### Arg parsing
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--is-monitored', action='store_true')
-parser.add_argument('obs_path')
-parser.add_argument('act_path')
-args = parser.parse_args()
-
-#### The real stuff
 
 clipped_high = np.array([2.5, 4.4, 0.28, 3.9])
 clipped_low  = -clipped_high
 state_ranges = np.array([clipped_low, clipped_high])
 
 env0 = gym.make('OffSwitchCartpole-v0')
-#env0.seed(42)
 
 four_n_weights, four_feature_vec \
     = fourier_fa.make_feature_vec(state_ranges,
@@ -59,17 +43,13 @@ experience0 = linfa.init(lmbda=0.9,
 
 n_episodes = 200
 
-#np.random.seed(42)
-
-if args.is_monitored:
-    env0.monitor.start("/tmp/cartpole-experiment-1", force=True)
+env0.monitor.start("/tmp/cartpole-experiment-1", force=True)
 
 experience0, steps_per_episode0, alpha_per_episode0 \
     = driver.train(env0, linfa, experience0, n_episodes=n_episodes,
             max_steps=200, is_render=False, is_continuing_env=True)
 
-if args.is_monitored:
-    env0.monitor.close()
+env0.monitor.close()
 
 fig = pyplot.figure(figsize=(5,8))
 ax01 = fig.add_subplot(211)
