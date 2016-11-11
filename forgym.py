@@ -66,7 +66,7 @@ if args.is_monitored:
 
 experience0, steps_per_episode0, alpha_per_episode0 \
     = driver.train(env0, linfa, experience0, n_episodes=n_episodes,
-            max_steps=200, is_render=False, is_wrapup_at_max_steps=False)
+            max_steps=200, is_render=False, is_continuing_env=True)
 
 if args.is_monitored:
     env0.monitor.close()
