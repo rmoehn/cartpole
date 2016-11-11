@@ -46,8 +46,6 @@ def train(env, learner, experience, n_episodes, max_steps, is_render=False,
         is_wrapup_at_max_steps=True):
     steps_per_episode = np.zeros(n_episodes, dtype=np.int32)
     alpha_per_episode = np.empty(n_episodes)
-    observations      = np.zeros((n_episodes, max_steps, 4))
-    actions           = np.zeros((n_episodes, max_steps), dtype=np.int8)
 
     for n_episode in xrange(n_episodes):
         observation = env.reset()
@@ -57,11 +55,9 @@ def train(env, learner, experience, n_episodes, max_steps, is_render=False,
         t = 0
         for t in xrange(max_steps):
             is_render and env.render() # pylint: disable=expression-not-assigned
-            observations[n_episode][t] = observation
             experience, action = learner.think(experience, observation, reward,
                                                done)
             observation, reward, done, _ = env.step(action)
-            actions[n_episode][t] = action
 
             if done and (t != (max_steps - 1) or is_wrapup_at_max_steps):
                 print "Wrapping up"
@@ -75,8 +71,7 @@ def train(env, learner, experience, n_episodes, max_steps, is_render=False,
             steps_per_episode[n_episode] = max_steps
             alpha_per_episode[n_episode] = experience.p_alpha
 
-    return experience, steps_per_episode, alpha_per_episode, observations, \
-        actions
+    return experience, steps_per_episode, alpha_per_episode
 
 
 def greedy_act(e, o):

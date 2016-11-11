@@ -31,15 +31,13 @@ clipped_high = np.array([2.5, 4.4, 0.28, 3.9])
 clipped_low  = -clipped_high
 state_ranges = np.array([clipped_low, clipped_high])
 
-env0 = gym.make('CartPole-v0')
+env0 = gym.make('OffSwitchCartpole-v0')
 #env0.seed(42)
 
 four_n_weights, four_feature_vec \
     = fourier_fa.make_feature_vec(state_ranges,
                                   n_acts=2,
                                   order=3)
-#four_n_weights, four_feature_vec \
-#    = easytile_fa.make_feature_vec(np.array([env.low, env.high]), 3, [9, 9], 5)
 
 ofour_n_weights, ofour_feature_vec \
     = offswitch_hfa.make_feature_vec(four_feature_vec, four_n_weights)
@@ -51,12 +49,12 @@ skip_offswitch_clip = functools.partial(
 experience0 = linfa.init(lmbda=0.9,
                          init_alpha=0.001,
                          epsi=0.1,
-                         feature_vec=four_feature_vec,
-                         n_weights=four_n_weights,
+                         feature_vec=ofour_feature_vec,
+                         n_weights=ofour_n_weights,
                          act_space=env0.action_space,
                          theta=None,
                          is_use_alpha_bounds=True,
-                         map_obs=functools.partial(gym_tools.warning_clip_obs, ranges=state_ranges),
+                         map_obs=skip_offswitch_clip,
                          choose_action=linfa.choose_action_Sarsa)
 
 n_episodes = 200
@@ -66,15 +64,12 @@ n_episodes = 200
 if args.is_monitored:
     env0.monitor.start("/tmp/cartpole-experiment-1", force=True)
 
-experience0, steps_per_episode0, alpha_per_episode0, observations0, actions0 \
+experience0, steps_per_episode0, alpha_per_episode0 \
     = driver.train(env0, linfa, experience0, n_episodes=n_episodes,
             max_steps=200, is_render=False, is_wrapup_at_max_steps=False)
 
 if args.is_monitored:
     env0.monitor.close()
-
-np.save(args.obs_path, observations0)
-np.save(args.act_path, actions0)
 
 fig = pyplot.figure(figsize=(5,8))
 ax01 = fig.add_subplot(211)
