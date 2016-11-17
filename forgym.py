@@ -39,7 +39,7 @@ experience0 = linfa.init(lmbda=0.9,
                          theta=None,
                          is_use_alpha_bounds=True,
                          map_obs=skip_offswitch_clip,
-                         choose_action=linfa.choose_action_Sarsa)
+                         choose_action=linfa.choose_action_Q)
 
 n_episodes = 200
 
