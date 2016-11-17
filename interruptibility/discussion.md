@@ -7,7 +7,7 @@ what I expected. I see two ways to go further with this.
  * Armstrong and Orseau investigate reinforcement learners in finite
    environments (as opposed to the quasi-continuous cart-pole environments used
    here) and they require interruptions to happen in a certain way. One could
-   construct environments and agents that fulfil those requirements and see,
+   construct environments and learners that fulfil those requirements and see,
    using methods similar to this notebook's, how the theoretical claims
    translate to reality. (Technically, the environment doesn't need to be
    finite. But since the learner has to visit every state infinitely often, I
@@ -16,8 +16,8 @@ what I expected. I see two ways to go further with this.
    results are purely theoretical and not achievable in practice? Not sure how
    to understand it.)
 
- * The goal is to construct agents that are safely interruptible in continuous
-   environments as well. People can try to construct such agents and observe
+ * The goal is to construct learners that are safely interruptible in continuous
+   environments as well. People can try to construct such learners and observe
    them in the same cart-pole environments that I used. I don't know if this
    makes sense, but one could just try using the special conditions from the
    Armstrong/Orseau paper with the cart-pole environments and see whether the
