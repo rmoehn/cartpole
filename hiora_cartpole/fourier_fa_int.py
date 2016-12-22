@@ -28,23 +28,25 @@ def sum_term(integral, c, c_vec):
 
 
 def make_sym_Q_s0(state_ranges, order):
-    n_dims = state_ranges.shape[0]
-    C = sp.symbols("c0:" + n_dims, integer=True)
-    S = sp.symbols("s0:" + n_dims, real=True)
+    n_dims = state_ranges.shape[1]
+    denorm_factor = np.prod( np.diff(state_ranges[:,1:], axis=0) )
+        # We calculate the integral of the normalized fn over [0, 1]. Need to
+        # denormalize afterwards.
+    C = sp.symbols("c0:" + str(n_dims), integer=True)
+    S = sp.symbols("s0:" + str(n_dims), real=True)
 
     integral = reduce(lambda f, s: sp.Integral(f, (s, 0, 1)),
                     S[1:], sp.cos(sp.pi * dot(S, C))).doit()
 
-    sum_terms = [sum_term(integral, C, c_vec)
-                    for c_vec in c_matrix(order, n_dims)]
-
-    np_sum_terms = [sp.lambdify(S[0], t, 'numpy')
-                        for t in sum_terms]
+    c_vecs          = c_matrix(order, n_dims)
+    sum_terms       = [sum_term(integral, C, c_vec) for c_vec in c_vecs]
+    np_sum_terms    = [sp.lambdify(S[0], t, np) for t in sum_terms]
 
     def sym_Q_s0_inner(theta, a, s0):
-        ns0 = (s0 - state_ranges[0]) / (state_ranges[1] - state_ranges[0])
-        theta_a = theta[a * theta.shape[0]:(a+1) * theta.shape[0]]
-        return np.dot(theta_a,
-                    np.array[(npst(ns0) for npst in np_sum_terms)])
+        ns0 = (s0 - state_ranges[0][0]) \
+                / (state_ranges[1][0] - state_ranges[0][0])
+        theta_a = theta[a * c_vecs.shape[0]:(a+1) * c_vecs.shape[0]]
+        return denorm_factor * \
+            np.dot(theta_a, np.array([npst(ns0) for npst in np_sum_terms]))
 
     return sym_Q_s0_inner
