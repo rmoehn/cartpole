@@ -52,20 +52,21 @@ def train(env, learner, experience, n_episodes, max_steps, is_render=False,
         reward      = 0
         done        = False
 
+        t = 0
         for t in xrange(max_steps):
             is_render and env.render() # pylint: disable=expression-not-assigned
             experience, action = learner.think(experience, observation, reward,
                                                done)
             observation, reward, done, _ = env.step(action)
 
-            if done and not (t == (max_steps - 1) and is_continuing_env):
-                steps_per_episode[n_episode] = t
-                alpha_per_episode[n_episode] = experience.p_alpha
-                experience = learner.wrapup(experience, observation, reward)
+            if done:
                 break
-        else:
-            steps_per_episode[n_episode] = max_steps
-            alpha_per_episode[n_episode] = experience.p_alpha
+
+        experience = learner.wrapup(experience, observation, reward,
+                            done=(done and not (t == (max_steps - 1)
+                                                and is_continuing_env)))
+        steps_per_episode[n_episode] = t
+        alpha_per_episode[n_episode] = experience.p_alpha
 
     return experience, steps_per_episode, alpha_per_episode
 

@@ -129,9 +129,11 @@ def think(e, o, r, done=False):
     return e.set(p_alpha=alpha, p_obs=o, p_act=a, p_feat=feat), a
 
 
-def wrapup(e, o, r):
-    o    = e.map_obs(o)
-    e, _ = think(e, o, r, done=True)
+def wrapup(e, o, r, done=False):
+    if done:
+        o    = e.map_obs(o)
+        e, _ = think(e, o, r, done=True)
+
     return e.set(p_obs=None, p_act=None, p_feat=None, E=np.zeros(e.E.shape))
 
 

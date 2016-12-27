@@ -30,7 +30,8 @@ def rewards_lefts_rights(make_env, make_experience, n_trainings,
     for i_training in xrange(n_trainings):
         experience, _, _ = driver.train(record_env, linfa,
                                 make_experience(record_env),
-                                n_episodes=n_episodes, max_steps=max_steps)
+                                n_episodes=n_episodes, max_steps=max_steps,
+                                is_continuing_env=True)
         rewards_per_episode += [np.sum(e['rewards'])
                                     for e in record_env.episodes]
         poss = np.array([xpos(o) for e in record_env.episodes
