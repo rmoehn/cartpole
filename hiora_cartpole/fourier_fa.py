@@ -50,7 +50,7 @@ def make_feature_vec(state_ranges, n_acts, order):
     """
     n_dims    = state_ranges.shape[1]
     n_entries = (order + 1)**n_dims
-    intervals = np.diff(state_ranges, axis=0)
+    intervals = np.squeeze(np.diff(state_ranges, axis=0))
 
     # All entries from cartesian product {0, …, order+1}^n_dims.
     c_matrix = np.array(
@@ -74,7 +74,7 @@ def make_feature_vec(state_ranges, n_acts, order):
         normalized_state = (state - state_ranges[0]) / intervals
 
         # Dot products of the feature vector with every c. → shape (n_entries,)
-        dot_prods = np.dot(c_matrix, normalized_state.transpose())[:,0]
+        dot_prods = np.dot(c_matrix, normalized_state)
 
         # Apply Fourier basis functions.
         feature_v = np.cos(np.pi * dot_prods)
