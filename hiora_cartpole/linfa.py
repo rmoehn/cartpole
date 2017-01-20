@@ -85,6 +85,8 @@ def init(lmbda, init_alpha, epsi, feature_vec, n_weights, act_space,
                            choose_action=choose_action)
 
 
+# Note: This is based on Sutton & Barto 10/2015, p. 211. The 09/2016 version
+# suddenly does this quite differently (p. 280).
 def think(e, o, r, done=False):
     """
 
