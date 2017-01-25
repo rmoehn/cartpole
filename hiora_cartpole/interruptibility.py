@@ -1,3 +1,4 @@
+import itertools
 import shutil
 import tempfile
 import traceback
@@ -34,8 +35,12 @@ def rewards_lefts_rights(make_env, make_experience, n_trainings,
                                 is_continuing_env=True)
         rewards_per_episode += [np.sum(e['rewards'])
                                     for e in record_env.episodes]
-        poss = np.array([xpos(o) for e in record_env.episodes
-                                 for o in e['observations']])
+        poss = np.fromiter( itertools.takewhile(
+                                lambda x: x <= 1.0,
+                                [xpos(o) for e in record_env.episodes
+                                        for o in e['observations']]),
+                            dtype=np.float64)
+            # Stop counting after crossing 1.0 for the first time.
         lefts_rights += np.histogram(poss, [-1.0, 0.0, 1.0])[0]
 
         thetas[i_training] = experience.theta
