@@ -9,10 +9,6 @@ from hiora_cartpole import linfa
 
 import multiprocessing
 
-def offswitch_xpos(o):
-    return o[1][0]
-
-
 # pylint: disable=too-many-arguments, too-many-locals
 def train_record(make_env, make_experience, n_trainings, n_episodes,
         max_steps, n_weights=None):
@@ -45,11 +41,10 @@ def tc_train_record(*args, **kwargs):
 
 # pylint: disable=too-many-arguments, too-many-locals
 def run_train_record(make_env, make_experience, n_procs, n_trainings,
-                             n_episodes, max_steps, xpos=offswitch_xpos,
-                             n_weights=None):
+        n_episodes, max_steps, n_weights=None):
     pool = multiprocessing.Pool(n_procs)
     args = [make_env, make_experience, n_trainings // n_procs, n_episodes,
-            max_steps, xpos, n_weights]
+            max_steps, n_weights]
 
     results = [pool.apply_async(tc_train_record, args) for _ in xrange(n_procs)]
     answers = [r.get() for r in results]
