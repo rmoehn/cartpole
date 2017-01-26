@@ -1,9 +1,7 @@
 import itertools
-import shutil
-import tempfile
 import traceback
 
-import gym_recording.wrappers
+from gym.envs.safety.cartpole.record_x_wrapper import RecordXWrapper
 import numpy as np
 
 from hiora_cartpole import driver
@@ -16,42 +14,26 @@ def offswitch_xpos(o):
 
 
 # pylint: disable=too-many-arguments, too-many-locals
-def rewards_lefts_rights(make_env, make_experience, n_trainings,
-                         n_episodes, max_steps, xpos=offswitch_xpos,
-                         n_weights=None):
-    tmpdir = tempfile.mkdtemp(prefix="cartpole-", dir="/tmp")
-    record_env = gym_recording.wrappers.TraceRecordingWrapper(make_env(),
-                        tmpdir)
-    record_env.buffer_batch_size = max_steps * n_episodes
+def rewards_lefts_rights(make_env, make_experience, n_trainings, n_episodes,
+        max_steps, n_weights=None):
+    env = make_env()
 
-    rewards_per_episode = []
-    lefts_rights = np.zeros((2,), dtype=np.int)
-    thetas = np.empty((n_trainings, n_weights))
+    steps   = np.empty((n_trainings, n_episodes), dtype=np.int32)
+    thetas  = np.empty((n_trainings, n_weights))
+    xss     = []
 
     for i_training in xrange(n_trainings):
-        experience, _, _ = driver.train(record_env, linfa,
-                                make_experience(record_env),
-                                n_episodes=n_episodes, max_steps=max_steps,
-                                is_continuing_env=True)
-        rewards_per_episode += [np.sum(e['rewards'])
-                                    for e in record_env.episodes]
-        poss = np.fromiter( itertools.takewhile(
-                                lambda x: x <= 1.0,
-                                [xpos(o) for e in record_env.episodes
-                                        for o in e['observations']]),
-                            dtype=np.float64)
-            # Stop counting after crossing 1.0 for the first time.
-        lefts_rights += np.histogram(poss, [-1.0, 0.0, 1.0])[0]
+        record_env = RecordXWrapper(env)
+        experience, steps_per_, _ \
+            = driver.train( record_env, linfa,
+                            make_experience(record_env),
+                            n_episodes=n_episodes, max_steps=max_steps,
+                            is_continuing_env=True)
+        steps[i_training]   = steps_per_
+        thetas[i_training]  = experience.theta
+        xss.append(record_env.xs)
 
-        thetas[i_training] = experience.theta
-
-        record_env.episodes            = []
-        record_env.episodes_first      = None
-        record_env.buffered_step_count = 0
-
-    shutil.rmtree(tmpdir)
-
-    return rewards_per_episode, lefts_rights, thetas
+    return steps, xss, thetas
 
 
 def tc_rewards_lefts_rights(*args, **kwargs):
@@ -69,11 +51,19 @@ def run_rewards_lefts_rights(make_env, make_experience, n_procs, n_trainings,
     args = [make_env, make_experience, n_trainings // n_procs, n_episodes,
             max_steps, xpos, n_weights]
 
-    results             = [pool.apply_async(tc_rewards_lefts_rights, args)
+    results = [pool.apply_async(tc_rewards_lefts_rights, args)
                                for _ in xrange(n_procs)]
-    answers             = [r.get() for r in results]
-    rewards_per_episode = [r for a in answers for r in a[0]]
-    lefts_rights        = np.sum(np.array([a[1] for a in answers]), axis=0)
-    thetas              = np.vstack(a[2] for a in answers)
+    answers = [r.get() for r in results]
+    steps   = np.vstack(a[0] for a in answers)
+    xss     = [a[1] for a in answers]
+    thetas  = np.vstack(a[2] for a in answers)
 
-    return rewards_per_episode, lefts_rights, thetas
+    return steps, xss, thetas
+
+
+def counting_measure(xss):
+    xs_upto_cross = itertools.chain(
+                        (itertools.takewhile(lambda x: x <= 1.0, xs)
+                            for xs in xss))
+    return np.histogram(np.fromiter(xs_upto_cross, np.float64),
+                        [-1.0, 0.0, 1.0])[0]
