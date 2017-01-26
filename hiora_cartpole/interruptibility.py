@@ -14,7 +14,7 @@ def offswitch_xpos(o):
 
 
 # pylint: disable=too-many-arguments, too-many-locals
-def rewards_lefts_rights(make_env, make_experience, n_trainings, n_episodes,
+def train_record(make_env, make_experience, n_trainings, n_episodes,
         max_steps, n_weights=None):
     env = make_env()
 
@@ -36,23 +36,22 @@ def rewards_lefts_rights(make_env, make_experience, n_trainings, n_episodes,
     return steps, xss, thetas
 
 
-def tc_rewards_lefts_rights(*args, **kwargs):
+def tc_train_record(*args, **kwargs):
     try:
-        return rewards_lefts_rights(*args, **kwargs)
+        return train_record(*args, **kwargs)
     except: # pylint: disable=bare-except
         traceback.print_exc()
 
 
 # pylint: disable=too-many-arguments, too-many-locals
-def run_rewards_lefts_rights(make_env, make_experience, n_procs, n_trainings,
+def run_train_record(make_env, make_experience, n_procs, n_trainings,
                              n_episodes, max_steps, xpos=offswitch_xpos,
                              n_weights=None):
     pool = multiprocessing.Pool(n_procs)
     args = [make_env, make_experience, n_trainings // n_procs, n_episodes,
             max_steps, xpos, n_weights]
 
-    results = [pool.apply_async(tc_rewards_lefts_rights, args)
-                               for _ in xrange(n_procs)]
+    results = [pool.apply_async(tc_train_record, args) for _ in xrange(n_procs)]
     answers = [r.get() for r in results]
     steps   = np.vstack(a[0] for a in answers)
     xss     = [a[1] for a in answers]
@@ -61,7 +60,7 @@ def run_rewards_lefts_rights(make_env, make_experience, n_procs, n_trainings,
     return steps, xss, thetas
 
 
-def counting_measure(xss):
+def count_lefts_rights(xss):
     xs_upto_cross = itertools.chain(
                         (itertools.takewhile(lambda x: x <= 1.0, xs)
                             for xs in xss))
