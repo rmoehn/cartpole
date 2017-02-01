@@ -49,7 +49,7 @@ def run_train_record(make_env, make_experience, n_procs, n_trainings,
     results = [pool.apply_async(tc_train_record, args) for _ in xrange(n_procs)]
     answers = [r.get() for r in results]
     steps   = np.vstack(a[0] for a in answers)
-    xss     = [a[1] for a in answers]
+    xss     = [xs for a in answers for xs in a[1]]
     thetas  = np.vstack(a[2] for a in answers)
 
     return steps, xss, thetas
@@ -57,7 +57,7 @@ def run_train_record(make_env, make_experience, n_procs, n_trainings,
 
 def count_lefts_rights(xss):
     xs_upto_cross = itertools.chain(
-                        (itertools.takewhile(lambda x: x <= 1.0, xs)
-                            for xs in xss))
+                        *[itertools.takewhile(lambda x: x <= 1.0, xs)
+                             for xs in xss])
     return np.histogram(np.fromiter(xs_upto_cross, np.float64),
                         [-1.0, 0.0, 1.0])[0]
