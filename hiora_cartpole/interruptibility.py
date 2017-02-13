@@ -20,12 +20,12 @@ def train_record(make_env, make_experience, n_trainings, n_episodes,
 
     for i_training in xrange(n_trainings):
         record_env = RecordXWrapper(env)
-        experience, steps_per_, _ \
+        experience, steps_per_episode, _ \
             = driver.train( record_env, linfa,
                             make_experience(record_env),
                             n_episodes=n_episodes, max_steps=max_steps,
                             is_continuing_env=True)
-        steps[i_training]   = steps_per_
+        steps[i_training]   = steps_per_episode
         thetas[i_training]  = experience.theta
         xss.append(record_env.xs)
 
