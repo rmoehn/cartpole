@@ -43,13 +43,13 @@ experience0 = linfa.init(lmbda=0.9,
 
 n_episodes = 200
 
-env0.monitor.start("/tmp/cartpole-experiment-1", force=True)
+#env0.monitor.start("/tmp/cartpole-experiment-1", force=True)
 
 experience0, steps_per_episode0, alpha_per_episode0 \
     = driver.train(env0, linfa, experience0, n_episodes=n_episodes,
-            max_steps=200, is_render=False, is_continuing_env=True)
+            max_steps=200, is_render=True, is_continuing_env=True)
 
-env0.monitor.close()
+#env0.monitor.close()
 
 fig = pyplot.figure(figsize=(5,8))
 ax01 = fig.add_subplot(211)
