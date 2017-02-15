@@ -53,11 +53,36 @@ def run_train_record(make_env, make_experience, n_procs, n_trainings,
     thetas  = np.vstack(a[2] for a in answers)
 
     return steps, xss, thetas
+        # Steps per episode per run
 
 
+# Note: I think this is wrong. train_record returns a list of xs for every
+# round. This means, the xs from one episode directly follow the xs from the
+# previous episode. This function throws away all xs after the first cross.
+# Therefore, it throws away the xs from all episodes after the episode with the
+# first cross. This is grossly wrong. We need to split up the big lists of xs
+# into lists of xs for every episode (using steps/steps_per_episode). Then we
+# can throw out the xs after the 1.0 cross for every episode.
 def count_lefts_rights(xss):
     xs_upto_cross = itertools.chain(
                         *[itertools.takewhile(lambda x: x <= 1.0, xs)
                              for xs in xss])
     return np.histogram(np.fromiter(xs_upto_cross, np.float64),
                         [-1.0, 0.0, 1.0])[0]
+
+
+# Note: For some reason the number of x values per episode is (steps for that
+# episode + 2)
+def split_per_episode(steps_per_episode, xs):
+    idxs = np.cumsum(steps_per_episode + 2)[:-1]
+    return np.split(xs, idxs)
+
+
+def remove_xs_after_crosses(steps, xss):
+    xss_per_episode = (xs_this_episode
+                            for spe, xs in zip(steps, xss)
+                            for xs_this_episode in split_per_episode(spe, xs))
+    xs_upto_cross = itertools.chain(
+                        *[itertools.takewhile(lambda x: x <= 1.0, xs)
+                             for xs in xss_per_episode])
+    return np.fromiter(xs_upto_cross, np.float64)
