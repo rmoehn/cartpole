@@ -78,11 +78,14 @@ def split_per_episode(steps_per_episode, xs):
     return np.split(xs, idxs)
 
 
+def xss_per_episode(steps, xss):
+    return (xs_this_episode
+                for spe, xs in zip(steps, xss)
+                for xs_this_episode in split_per_episode(spe, xs))
+
+
 def remove_xs_after_crosses(steps, xss):
-    xss_per_episode = (xs_this_episode
-                            for spe, xs in zip(steps, xss)
-                            for xs_this_episode in split_per_episode(spe, xs))
     xs_upto_cross = itertools.chain(
                         *[itertools.takewhile(lambda x: x <= 1.0, xs)
-                             for xs in xss_per_episode])
+                             for xs in xss_per_episode(steps, xss)])
     return np.fromiter(xs_upto_cross, np.float64)
