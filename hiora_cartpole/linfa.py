@@ -50,13 +50,13 @@ def choose_action_Sarsa(e, o):
 
 LinfaExperience = pyrsistent.immutable(
                     'feature_vec, theta, E, epsi, init_alpha, p_alpha, lmbda,'
-                    ' p_obs, p_act, p_feat, act_space, is_use_alpha_bounds,'
-                    ' map_obs, choose_action')
+                    ' gamma, p_obs, p_act, p_feat, act_space,'
+                    ' is_use_alpha_bounds, map_obs, choose_action')
 
 # pylint: disable=too-many-arguments
 def init(lmbda, init_alpha, epsi, feature_vec, n_weights, act_space,
         theta=None, is_use_alpha_bounds=False, map_obs=lambda x: x,
-        choose_action=choose_action_Sarsa):
+        choose_action=choose_action_Sarsa, gamma=1.0):
     """
 
     Arguments:
@@ -76,6 +76,7 @@ def init(lmbda, init_alpha, epsi, feature_vec, n_weights, act_space,
                            init_alpha=init_alpha,
                            p_alpha=init_alpha,
                            lmbda=lmbda,
+                           gamma=gamma,
                            p_obs=None, # p … previous
                            p_act=None,
                            p_feat=None,
@@ -119,7 +120,7 @@ def think(e, o, r, done=False):
 
     if e.p_obs is not None: # Except for first timestep.
         Qcur  = e.p_feat.dot(e.theta)
-        delta = Qcur - (r + Qnext) # Yes, in the gradient it's inverted.
+        delta = Qcur - (r + e.gamma * Qnext) # Yes, in the gradient it's inverted.
         e.p_feat.add_to(e.E)
 
         # Note: Eligibility traces could be done slightly more succinctly by
