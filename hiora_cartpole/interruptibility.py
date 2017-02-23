@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import itertools
 import traceback
 
 from gym.envs.safety.cartpole.record_x_wrapper import RecordXWrapper
 import numpy as np
+import numpy.ma as ma
 
 from hiora_cartpole import driver
 from hiora_cartpole import linfa
@@ -71,17 +74,90 @@ def count_lefts_rights(xss):
                         [-1.0, 0.0, 1.0])[0]
 
 
+# Notation:
+#
+# r  round
+# e  episode
+# x  x-coordinate
+# n  episode length
+# -s plural of -
+# <origin>_<structure>
+#
+# Example:
+#
+#  rs_esxs
+#  - origin:    multiple rounds
+#  - structure: [[x]]
+#               ↑
+#               episode
+#  - For every episode a list of x-coordinates in that episode. Episodes from
+#    multiple rounds together in one list.
+#
+# If only I had Specter! It would make this stuff much easier.
+
+
 # Note: For some reason the number of x values per episode is (steps for that
 # episode + 2)
 def split_per_episode(steps_per_episode, xs):
+    """
+
+    r_ns, r_xs → r_esxs
+
+    Like this::
+
+        one run
+        [x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x]
+                                       |
+                                       v
+        [[xxxx] [xxxx] [xxxxxxxxxx] [xxxxxxxxxxxx] [xxxxxxxxxxxxxxx]]
+         ep. 0  ep. 1...
+
+    The numbers of xs might not match.
+    """
     idxs = np.cumsum(steps_per_episode + 2)[:-1]
     return np.split(xs, idxs)
 
 
 def xss_per_episode(steps, xss):
+    """
+
+    rsns, rsxs → rs_esxs
+    """
     return (xs_this_episode
                 for spe, xs in zip(steps, xss)
                 for xs_this_episode in split_per_episode(spe, xs))
+
+
+def rsxs2rsesxs(rsns, rsxs):
+    """
+
+    rsxs → rsesxs
+
+    Like this::
+    [[x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x] run 0
+     [x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x] run 1
+     [x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x]] r. 2
+                                        |
+                                        v
+    [[[xxxx] [xxxx] [xxxxxxxxxx] [xxxxxxxxxxxx] [xxxxxxxxxxxxxxx]]   run 0
+     [[xxxx] [xxxx] [xxxxxxxxxx] [xxxxxxxxxxxx] [xxxxxxxxxxxxxxx]]   run 1
+     [[xxxx] [xxxx] [xxxxxxxxxx] [xxxxxxxxxxxx] [xxxxxxxxxxxxxxx]]]  run 2
+      ep. 0  ep. 1...
+    """
+
+    return (split_per_episode(r_ns, r_xs) for r_ns, r_xs in zip(rsns, rsxs))
+
+
+def rsxs2nparray(rsns, rsxs):
+    max_n       = np.max(rsns) + 2 # See note above.
+    rsesxs_cube = np.full(( len(rsxs), len(rsns[0]), max_n ), -100.0)
+
+    for ri, r_esxs in enumerate( rsxs2rsesxs(rsns, rsxs) ):
+        for ei, e_xs in enumerate(r_esxs):
+            rsesxs_cube[ri, ei] = np.pad(e_xs, (0, max_n - len(e_xs)),
+                                        'constant', constant_values=100.0)
+
+    return ma.masked_greater(rsesxs_cube, 99.0)
 
 
 def remove_xs_after_crosses(steps, xss):
