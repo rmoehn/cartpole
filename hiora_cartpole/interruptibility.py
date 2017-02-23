@@ -148,6 +148,17 @@ def rsxs2rsesxs(rsns, rsxs):
     return (split_per_episode(r_ns, r_xs) for r_ns, r_xs in zip(rsns, rsxs))
 
 
+def remove_xs_after_crosses(steps, xss):
+    xs_upto_cross = itertools.chain(
+                        *[itertools.takewhile(lambda x: x <= 1.0, xs)
+                             for xs in xss_per_episode(steps, xss)])
+    return np.fromiter(xs_upto_cross, np.float64)
+
+
+##### This is what counts. All the other transformers are vrøvl.
+
+# Note: For some reason the number of x values per episode is (steps for that
+# episode + 2)
 def rsxs2nparray(rsns, rsxs):
     max_n       = np.max(rsns) + 2 # See note above.
     rsesxs_cube = np.full(( len(rsxs), len(rsns[0]), max_n ), -100.0)
@@ -158,10 +169,3 @@ def rsxs2nparray(rsns, rsxs):
                                         'constant', constant_values=100.0)
 
     return ma.masked_greater(rsesxs_cube, 99.0)
-
-
-def remove_xs_after_crosses(steps, xss):
-    xs_upto_cross = itertools.chain(
-                        *[itertools.takewhile(lambda x: x <= 1.0, xs)
-                             for xs in xss_per_episode(steps, xss)])
-    return np.fromiter(xs_upto_cross, np.float64)
