@@ -7,16 +7,14 @@ from matplotlib import pyplot as plt
 from matplotlib import gridspec
 import numpy as np
 
-from hiora_cartpole import interruptibility
-
 # Plot in procedure pattern credits:
 # https://github.com/joferkington/oost_paper_code/blob/master/error_ellipse.py
-def plot_xss_cum_hist_devel(xss, ax=None):
-    all_xs = np.hstack(xss)
-    run_of_x = np.hstack([np.full(len(xs), n_run)
-                        for n_run, xs in enumerate(xss)])
-    hist, x_edges, y_edges = np.histogram2d(all_xs, run_of_x,
-                                            bins=[51, len(xss) // 4])
+def plot_xss_cum_hist_devel(xs, ax=None):
+    run_of_x = np.hstack([np.full(run.count(), n_run)
+                        for n_run, run in enumerate(xs)])
+    hist, x_edges, y_edges = np.histogram2d(xs.compressed(), run_of_x,
+                                            bins=[51, xs.shape[0] // 4],
+                                            range=[[-2.4, 2.4], [0, 170]])
     hist = hist.T
     cum_hist = np.cumsum(hist, axis=0)
     norm_cum_hist = cum_hist / np.sum(cum_hist, axis=1)[:,None]
