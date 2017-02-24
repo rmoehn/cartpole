@@ -169,3 +169,58 @@ def rsxs2nparray(rsns, rsxs):
                                         'constant', constant_values=100.0)
 
     return ma.masked_greater(rsesxs_cube, 99.0)
+
+
+def mask_after_cross(xsarray):
+    xsarray     = ma.copy(xsarray)
+    marked      = np.where(xsarray <= 1.0, xsarray, np.full_like(xsarray, 10.))
+    maxes       = np.max(marked, axis=2)
+    max_idcs    = np.argmax(marked, axis=2)
+    cross_idcs  = np.where(maxes == 10., max_idcs,
+                        np.full_like(max_idcs, xsarray.shape[2]))
+
+    # Note: Don't know to this with NumPy. But it's fast enough anyway.
+    for i_round in xrange(xsarray.shape[0]):
+        for i_episode in xrange(xsarray.shape[1]):
+            xsarray[i_round, i_episode, cross_idcs[i_round, i_episode]:] \
+                = ma.masked
+
+    return xsarray
+
+# For testing (add tests for different shapes!):
+# In [53]: xsarray1 = ma.array([[[0.1, 1.1, 0.5],
+#     ...:                       [0.2, 0.3, 0.9]],
+#     ...:                      [[-1.0, 1.0, 1.1],
+#     ...:                       [0.1, 1.5, 1.6]]])
+#
+# In [54]: xsarray1
+# Out[54]:
+# masked_array(data =
+#  [[[ 0.1  1.1  0.5]
+#   [ 0.2  0.3  0.9]]
+#
+#  [[-1.   1.   1.1]
+#   [ 0.1  1.5  1.6]]],
+#              mask =
+#  False,
+#        fill_value = 1e+20)
+#
+# In [55]: canon_xsarray = np.copy(xsarray1)
+#
+# In [56]: mask_after_cross(xsarray1)
+#
+# In [57]: xsarray1
+# Out[57]:
+# masked_array(data =
+#  [[[0.1 -- --]
+#   [0.2 0.3 0.9]]
+#
+#  [[-1.0 1.0 --]
+#   [0.1 -- --]]],
+#              mask =
+#  [[[False  True  True]
+#   [False False False]]
+#
+#  [[False False  True]
+#   [False  True  True]]],
+#        fill_value = 1e+20)
