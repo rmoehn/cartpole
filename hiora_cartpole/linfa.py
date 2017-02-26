@@ -17,8 +17,13 @@ def true_with_prob(p):
 def choose_greedy(e, o):
     feats = [e.feature_vec(o, a) for a in xrange(e.act_space.n)]
     Qs    = [f.dot(e.theta) for f in feats]
-    return max(itertools.izip(Qs, xrange(e.act_space.n), feats),
-               key=operator.itemgetter(0))
+
+    if all(Q == Qs[0] for Q in Qs):
+        a = np.random.choice(2)
+        return Qs[a], a, feats[a]
+    else:
+        return max(itertools.izip(Qs, xrange(e.act_space.n), feats),
+                key=operator.itemgetter(0))
 
 
 def choose_action_Q(e, o):
