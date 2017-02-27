@@ -9,11 +9,11 @@ import numpy as np
 
 # Plot in procedure pattern credits:
 # https://github.com/joferkington/oost_paper_code/blob/master/error_ellipse.py
-def plot_xss_cum_hist_devel(xs, ax=None):
+def plot_xss_cum_hist_devel(xs, ax=None, bins=25):
     all_xs      = xs.compressed()
     n_xs        = all_xs.shape[0]
     hist, x_edges, y_edges = np.histogram2d(all_xs, np.arange(n_xs),
-                                            bins=[25, 25],
+                                            bins=[bins, 25],
                                             range=[[-2.4, 2.4],
                                                    [0, n_xs]])
     hist = hist.T
@@ -49,8 +49,8 @@ def plot_episode_lengths(steps_per_episode, ax):
     ax.plot(np.hstack(steps_per_episode))
 
 
-def plot_xs_hist(xs, ax):
-    ax.hist(xs, range=(-2.4, 2.4), bins=25, normed=True)
+def plot_xs_hist(xs, ax, bins=25):
+    ax.hist(xs, range=(-2.4, 2.4), bins=bins, normed=True)
 
 
 def arrange_algo_full(algo):
