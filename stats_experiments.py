@@ -48,6 +48,18 @@ def plot_xss_cum_hist_change(xs, ax=None, bins=25):
     ax.plot(changes)
 
 
+def plot_mean_std_change(xs, ax=None):
+    all_xs = xs.compressed()
+    n_xs   = all_xs.shape[0]
+
+    cum_mean = [np.mean(all_xs[:i]) for i in xrange(1, n_xs, n_xs // 100)]
+    cum_mean.append(np.mean(all_xs))
+
+    ax = ax or plt.gca()
+    ax.plot(cum_mean)
+
+
+
 keyseq = lambda: itertools.product(
                 ['Sarsa', 'Q-learning'], ['uninterrupted', 'interrupted'])
 
