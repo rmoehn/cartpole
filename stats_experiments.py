@@ -8,9 +8,7 @@ from matplotlib import pyplot as plt
 from matplotlib import gridspec
 import numpy as np
 
-# Plot in procedure pattern credits:
-# https://github.com/joferkington/oost_paper_code/blob/master/error_ellipse.py
-def plot_xss_cum_hist_devel(xs, ax=None, bins=25):
+def norm_cum_hist(xs, bins):
     all_xs      = xs.compressed()
     n_xs        = all_xs.shape[0]
     hist, x_edges, y_edges = np.histogram2d(all_xs, np.arange(n_xs),
@@ -19,13 +17,35 @@ def plot_xss_cum_hist_devel(xs, ax=None, bins=25):
                                                    [0, n_xs]])
     hist = hist.T
     cum_hist = np.cumsum(hist, axis=0)
-    norm_cum_hist = cum_hist / np.sum(cum_hist, axis=1)[:,None]
+    return cum_hist / np.sum(cum_hist, axis=1)[:,None], x_edges, y_edges
+
+
+# Plot in procedure pattern credits:
+# https://github.com/joferkington/oost_paper_code/blob/master/error_ellipse.py
+def plot_xss_cum_hist_devel(xs, ax=None, bins=25):
+    nch, x_edges, y_edges = norm_cum_hist(xs, bins)
 
     if ax is None:
         ax = plt.gca()
 
     X, Y = np.meshgrid(x_edges, y_edges)
-    ax.pcolormesh(X, Y, norm_cum_hist)
+    mesh = ax.pcolormesh(X, Y, nch)
+
+    return mesh
+
+
+def plot_xss_cum_hist_change(xs, ax=None, bins=25):
+    nch, _, _ = norm_cum_hist(xs, bins)
+
+    diff = np.abs(np.diff(nch, axis=0))
+    nozero_nch = np.where(nch == 0, 100, nch)
+    rel_diff = diff / nozero_nch[1:] * 100
+    changes = np.max(rel_diff, axis=1)
+
+    if ax is None:
+        ax = plt.gca()
+
+    ax.plot(changes)
 
 
 keyseq = lambda: itertools.product(
