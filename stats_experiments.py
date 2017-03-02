@@ -48,15 +48,25 @@ def plot_xss_cum_hist_change(xs, ax=None, bins=25):
     ax.plot(changes)
 
 
-def plot_mean_std_change(xs, ax=None):
+# Credits: http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.fill
+def plot_mean_std_change(xs, ax=None, label=None):
     all_xs = xs.compressed()
     n_xs   = all_xs.shape[0]
 
     cum_mean = [np.mean(all_xs[:i]) for i in xrange(1, n_xs, n_xs // 100)]
     cum_mean.append(np.mean(all_xs))
+    cum_mean = np.array(cum_mean)
+
+    cum_std = [np.std(all_xs[:i]) for i in xrange(1, n_xs, n_xs // 100)]
+    cum_std.append(np.std(all_xs))
+    cum_std = np.array(cum_std)
 
     ax = ax or plt.gca()
-    ax.plot(cum_mean)
+    p = ax.plot(cum_mean, xrange(cum_mean.shape[0]), label=label)
+    # Credits: http://stackoverflow.com/a/36700159/5091738
+    ax.fill_betweenx(xrange(cum_mean.shape[0]),
+            cum_mean - cum_std, cum_mean + cum_std, alpha=0.3,
+            facecolor=p[0].get_color())
 
 
 
@@ -82,8 +92,9 @@ def plot_episode_lengths(steps_per_episode, ax):
     ax.plot(np.hstack(steps_per_episode))
 
 
-def plot_xs_hist(xs, ax, bins=25):
-    ax.hist(xs, range=(-2.4, 2.4), bins=bins, normed=True)
+def plot_xs_hist(xs, ax, bins=25, label=""):
+    ax.hist(xs, range=(-2.4, 2.4), bins=bins, normed=True, alpha=0.3,
+            label=label)
 
 
 Axes = collections.namedtuple(
