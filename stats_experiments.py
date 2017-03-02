@@ -8,6 +8,40 @@ from matplotlib import pyplot as plt
 from matplotlib import gridspec
 import numpy as np
 
+# Credits: itertools documentation.
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return itertools.izip(a, b)
+
+
+# Credits: https://gist.github.com/swayson/86c296aa354a555536e6765bbe726ff7
+def kld(p, q):
+    """Kullback-Leibler divergence D(P || Q) for discrete distributions
+    Parameters
+    ----------
+    p, q : array-like, dtype=float, shape=n
+    Discrete probability distributions.
+    """
+
+    return np.sum(np.where(p != 0, p * np.log(p / q), 0))
+
+
+def jsd(p, q): # Jenses-Shannon divergence
+    m = 0.5 * (p + q)
+
+    # http://stackoverflow.com/a/29950752/5091738
+    # Division by zero can only occur in kld when an entry of m is zero. This
+    # can only happen if both p and q are zero. In this case, kld ignores the
+    # nan resulting from log(inf), because its first argument is zero.
+    # Therefore, it is is safe to ignore this error.
+    with np.errstate(divide='ignore', invalid='ignore'):
+        res = 0.5 * (kld(p, m) + kld(q, m))
+
+    return res
+
+
 def norm_cum_hist(xs, bins):
     all_xs      = xs.compressed()
     n_xs        = all_xs.shape[0]
@@ -18,6 +52,16 @@ def norm_cum_hist(xs, bins):
     hist = hist.T
     cum_hist = np.cumsum(hist, axis=0)
     return cum_hist / np.sum(cum_hist, axis=1)[:,None], x_edges, y_edges
+
+
+def plot_jsd_devel(xs, bins=25, ax=None):
+    nch, _, _ = norm_cum_hist(xs, bins)
+
+    jsds = (jsd(nch[i], nch[i+1]) for i in xrange(nch.shape[0] - 1))
+        # scipy.stats.entropy calculates the KL divergence if given two args.
+
+    ax = ax or plt.gca()
+    ax.plot(np.fromiter(jsds, np.float64))
 
 
 # Plot in procedure pattern credits:
