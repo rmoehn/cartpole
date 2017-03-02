@@ -58,7 +58,15 @@ def plot_jsd_devel(xs, bins=25, ax=None):
     nch, _, _ = norm_cum_hist(xs, bins)
 
     jsds = (jsd(nch[i], nch[i+1]) for i in xrange(nch.shape[0] - 1))
-        # scipy.stats.entropy calculates the KL divergence if given two args.
+
+    ax = ax or plt.gca()
+    ax.plot(np.fromiter(jsds, np.float64))
+
+
+def plot_jsd_comp_final(xs, bins=25, ax=None):
+    nch, _, _ = norm_cum_hist(xs, bins)
+
+    jsds = (jsd(nch[i], nch[-1]) for i in xrange(nch.shape[0] - 1))
 
     ax = ax or plt.gca()
     ax.plot(np.fromiter(jsds, np.float64))
