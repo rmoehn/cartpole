@@ -150,41 +150,57 @@ def plot_xs_hist(xs, ax, bins=25, label=""):
 
 
 Axes = collections.namedtuple(
-            'Axes', ['el', 'devel', 'devel2', 'comp', 'comp2'])
+            'Axes', ['el', 'devel', 'devel2', 'jsd', 'hist', 'hist2',
+                     'meanstd'])
 
 def arrange_algo_full():
     fig = plt.figure(figsize=(10, 12))
 
-    gs = gridspec.GridSpec(4, 8)
+    gs = gridspec.GridSpec(10, 5)
 
     unintint = ("uninterrupted", "interrupted")
 
     ax = Axes(*([None, None] for _ in xrange(len(Axes._fields))))
 
-    for (i, n) in enumerate(unintint):
-        ax.el[i] = fig.add_subplot(gs[i, 0:3])
+    for i in xrange(len(unintint)):
+        ax.el[i] = fig.add_subplot(gs[5*i:, 0])
         ax.el[i].set_title("episode lengths")
         ax.el[i].set_xlabel("episode nr.")
         ax.el[i].set_ylabel("duration/total reward")
 
-        ax.devel[i] = fig.add_subplot(gs[i, 3:6])
-        ax.devel[i].set_title("cumulative hist. over time")
+        ax.devel[i] = fig.add_subplot(gs[:4, i+1])
+        ax.devel[i].set_title("hist. over time")
         ax.devel[i].set_xlabel("x-coordinate of cart")
         ax.devel[i].set_ylabel("timestep nr.")
 
-        ax.devel2[i] = fig.add_subplot(gs[i, 6:])
+        ax.devel2[i] = fig.add_subplot(gs[4:6, i+1])
+        ax.devel2[i].set_title("hist. over time")
         ax.devel2[i].set_xlabel("x-coordinate of cart")
         ax.devel2[i].set_ylabel("timestep nr.")
 
-        ax.comp[i] = fig.add_subplot(gs[2+i, 0:4])
-        ax.comp[i].set_title("histogram over all timesteps before 1.0 crosses")
-        ax.comp[i].set_xlabel("x-coordinate of cart")
-        ax.comp[i].set_ylabel("proportion of time spent")
+        ax.jsd[i] = fig.add_subplot(gs[6:, i+1])
+        ax.jsd[i].set_title("Jensen-Shannon div.")
+        ax.jsd[i].set_xlabel("JSD")
+        ax.jsd[i].set_ylabel("timestep nr.")
+        ax.jsd[i].legend()
 
-        ax.comp2[i] = fig.add_subplot(gs[2+i, 4:8])
-        ax.comp2[i].set_title("histogram over all timesteps before 1.0 crosses")
-        ax.comp2[i].set_xlabel("x-coordinate of cart")
-        ax.comp2[i].set_ylabel("proportion of time spent")
+    ax = ax._replace(hist=fig.add_subplot(gs[:5, 3]))
+    ax.hist.set_title("histogram over all timesteps before 1.0 crosses")
+    ax.hist.set_xlabel("x-coordinate of cart")
+    ax.hist.set_ylabel("proportion of time spent")
+    ax.hist.legend()
+
+    ax = ax._replace(hist2=fig.add_subplot(gs[5:, 3]))
+    ax.hist2.set_title("histogram over all timesteps before 1.0 crosses")
+    ax.hist2.set_xlabel("x-coordinate of cart")
+    ax.hist2.set_ylabel("proportion of time spent")
+    ax.hist2.legend()
+
+    ax = ax._replace(meanstd=fig.add_subplot(gs[:, 4]))
+    ax.meanstd.set_title("mean and std")
+    ax.meanstd.set_xlabel("mean +/- 1 std")
+    ax.meanstd.set_ylabel("timestep nr.")
+    ax.meanstd.legend()
 
     fig.tight_layout()
 
