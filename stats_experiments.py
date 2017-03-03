@@ -66,13 +66,13 @@ def plot_jsd_devel(xs, bins=25, ax=None):
     ax.plot(np.fromiter(jsds, np.float64))
 
 
-def plot_jsd_comp_final(xs, bins=25, ax=None):
+def plot_jsd_comp_final(xs, bins=25, ax=None, label=None):
     nch, _, _ = norm_cum_hist(xs, bins)
 
     jsds = (jsd(nch[i], nch[-1]) for i in xrange(nch.shape[0] - 1))
 
     ax = ax or plt.gca()
-    ax.plot(np.fromiter(jsds, np.float64))
+    ax.plot(np.fromiter(jsds, np.float64), label=label)
 
 
 # Plot in procedure pattern credits:
@@ -160,58 +160,59 @@ unintint = ("uninterrupted", "interrupted")
 
 
 def arrange_algo_full():
-    fig = plt.figure(figsize=(10, 12))
+    fig = plt.figure(figsize=(12, 20))
 
-    gs = gridspec.GridSpec(10, 5)
+    gs = gridspec.GridSpec(5, 10)
 
     ax = Axes(*([None, None] for _ in xrange(len(Axes._fields))))
 
     for i in xrange(len(unintint)):
-        ax.el[i] = fig.add_subplot(gs[5*i:, 0])
+        ax.el[i] = fig.add_subplot(gs[0, 5*i:5*(i+1)])
         ax.el[i].set_title("episode lengths")
         ax.el[i].set_xlabel("episode nr.")
         ax.el[i].set_ylabel("duration/total reward")
 
-        ax.devel[i] = fig.add_subplot(gs[:4, i+1])
+        ax.devel[i] = fig.add_subplot(gs[i+1, :4])
         ax.devel[i].set_title("hist. over time")
         ax.devel[i].set_xlabel("x-coordinate of cart")
         ax.devel[i].set_ylabel("timestep nr.")
 
-        ax.devel2[i] = fig.add_subplot(gs[4:6, i+1])
+        ax.devel2[i] = fig.add_subplot(gs[i+1, 4:6])
         ax.devel2[i].set_title("hist. over time")
         ax.devel2[i].set_xlabel("x-coordinate of cart")
         ax.devel2[i].set_ylabel("timestep nr.")
 
-        ax.jsd[i] = fig.add_subplot(gs[6:, i+1])
+        ax.jsd[i] = fig.add_subplot(gs[i+1, 6:])
         ax.jsd[i].set_title("Jensen-Shannon div.")
         ax.jsd[i].set_xlabel("JSD")
         ax.jsd[i].set_ylabel("timestep nr.")
-        ax.jsd[i].legend()
 
-    ax = ax._replace(hist=fig.add_subplot(gs[:5, 3]))
+    ax = ax._replace(hist=fig.add_subplot(gs[3, :5]))
     ax.hist.set_title("histogram over all timesteps before 1.0 crosses")
     ax.hist.set_xlabel("x-coordinate of cart")
     ax.hist.set_ylabel("proportion of time spent")
-    ax.hist.legend()
 
-    ax = ax._replace(hist2=fig.add_subplot(gs[5:, 3]))
+    ax = ax._replace(hist2=fig.add_subplot(gs[3, 5:]))
     ax.hist2.set_title("histogram over all timesteps before 1.0 crosses")
     ax.hist2.set_xlabel("x-coordinate of cart")
     ax.hist2.set_ylabel("proportion of time spent")
-    ax.hist2.legend()
 
-    ax = ax._replace(meanstd=fig.add_subplot(gs[:, 4]))
+    ax = ax._replace(meanstd=fig.add_subplot(gs[4, :]))
     ax.meanstd.set_title("mean and std")
     ax.meanstd.set_xlabel("mean +/- 1 std")
     ax.meanstd.set_ylabel("timestep nr.")
-    ax.meanstd.legend()
 
     fig.tight_layout()
 
     return fig, ax
 
+# TODO: (RM 2017-03-03)
+# - Use actual time steps for the JSD and mean-std plots. This can be done by
+#   supplying an xs/ys array.
+# - Turn Jensen-Shannon around, so that it's aligned with the hist devel plots.
 
-def load_plot_all(algo, algo_sub, interr01, ax, data_dir_p):
+# pylint: disable=too-many-arguments
+def load_plot_all(algo, algo_sub, interr01, ax, fig, data_dir_p):
     with saveloaddata.load_res(algo + algo_sub, unintint[interr01],
             data_dir_p) as res:
         el = res[0]
@@ -219,10 +220,27 @@ def load_plot_all(algo, algo_sub, interr01, ax, data_dir_p):
 
     plot_episode_lengths(el[:10], ax.el[interr01])
     before_cross = interruptibility.mask_after_cross(xs)
-    plot_xss_cum_hist_devel(before_cross, ax.devel[interr01], bins=25)
-    plot_xss_cum_hist_devel(before_cross, ax.devel2[interr01], bins=2)
-    plot_xs_hist(before_cross.compressed(), ax.comp[interr01], bins=25)
-    plot_xs_hist(before_cross.compressed(), ax.comp2[interr01], bins=2)
+
+    mesh = plot_xss_cum_hist_devel(before_cross, ax.devel[interr01], bins=25)
+    fig.colorbar(mesh, ax=ax.devel[interr01])
+    mesh = plot_xss_cum_hist_devel(before_cross, ax.devel2[interr01], bins=2)
+    fig.colorbar(mesh, ax=ax.devel2[interr01])
+
+    plot_jsd_comp_final(before_cross, bins=25, ax=ax.jsd[interr01],
+        label="25 bins")
+    plot_jsd_comp_final(before_cross, bins=2, ax=ax.jsd[interr01],
+        label="2 bins")
+    ax.jsd[interr01].legend()
+
+    plot_xs_hist(before_cross.compressed(), ax.hist, bins=25,
+            label=unintint[interr01])
+    ax.hist.legend()
+    plot_xs_hist(before_cross.compressed(), ax.hist2, bins=2,
+            label=unintint[interr01])
+    ax.hist2.legend()
+
+    plot_mean_std_change(before_cross, ax=ax.meanstd, label=unintint[interr01])
+    ax.meanstd.legend()
 
     print "%10s %13s mean: %1.4f std: %1.4f" % \
         (algo, unintint[interr01], np.mean(before_cross), np.std(before_cross))
