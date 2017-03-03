@@ -8,6 +8,9 @@ from matplotlib import pyplot as plt
 from matplotlib import gridspec
 import numpy as np
 
+from hiora_cartpole import interruptibility
+import saveloaddata
+
 # Credits: itertools documentation.
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -153,12 +156,13 @@ Axes = collections.namedtuple(
             'Axes', ['el', 'devel', 'devel2', 'jsd', 'hist', 'hist2',
                      'meanstd'])
 
+unintint = ("uninterrupted", "interrupted")
+
+
 def arrange_algo_full():
     fig = plt.figure(figsize=(10, 12))
 
     gs = gridspec.GridSpec(10, 5)
-
-    unintint = ("uninterrupted", "interrupted")
 
     ax = Axes(*([None, None] for _ in xrange(len(Axes._fields))))
 
@@ -205,3 +209,20 @@ def arrange_algo_full():
     fig.tight_layout()
 
     return fig, ax
+
+
+def load_plot_all(algo, algo_sub, interr01, ax, data_dir_p):
+    with saveloaddata.load_res(algo + algo_sub, unintint[interr01],
+            data_dir_p) as res:
+        el = res[0]
+        xs = interruptibility.rsxs2nparray(*res)
+
+    plot_episode_lengths(el[:10], ax.el[interr01])
+    before_cross = interruptibility.mask_after_cross(xs)
+    plot_xss_cum_hist_devel(before_cross, ax.devel[interr01], bins=25)
+    plot_xss_cum_hist_devel(before_cross, ax.devel2[interr01], bins=2)
+    plot_xs_hist(before_cross.compressed(), ax.comp[interr01], bins=25)
+    plot_xs_hist(before_cross.compressed(), ax.comp2[interr01], bins=2)
+
+    print "%10s %13s mean: %1.4f std: %1.4f" % \
+        (algo, unintint[interr01], np.mean(before_cross), np.std(before_cross))
