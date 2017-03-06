@@ -58,21 +58,22 @@ def norm_cum_hist(xs, bins):
 
 
 def plot_jsd_devel(xs, bins=25, ax=None):
-    nch, _, _ = norm_cum_hist(xs, bins)
+    nch, _, y_edges = norm_cum_hist(xs, bins)
 
     jsds = (jsd(nch[i], nch[i+1]) for i in xrange(nch.shape[0] - 1))
 
     ax = ax or plt.gca()
-    ax.plot(np.fromiter(jsds, np.float64))
+    np_jsds = np.fromiter(jsds, np.float64)
+    ax.fill_betweenx(y_edges[:-2], 0, np_jsds)
 
 
 def plot_jsd_comp_final(xs, bins=25, ax=None, label=None):
-    nch, _, _ = norm_cum_hist(xs, bins)
+    nch, _, y_edges = norm_cum_hist(xs, bins)
 
     jsds = (jsd(nch[i], nch[-1]) for i in xrange(nch.shape[0] - 1))
 
     ax = ax or plt.gca()
-    ax.plot(np.fromiter(jsds, np.float64), label=label)
+    ax.plot(np.fromiter(jsds, np.float64), y_edges[:-2], label=label)
 
 
 # Plot in procedure pattern credits:
