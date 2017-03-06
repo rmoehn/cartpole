@@ -109,18 +109,22 @@ def plot_mean_std_change(xs, ax=None, label=None):
     all_xs = xs.compressed()
     n_xs   = all_xs.shape[0]
 
-    cum_mean = [np.mean(all_xs[:i]) for i in xrange(1, n_xs, n_xs // 100)]
+    progressions = range(1, n_xs, n_xs // 100)
+
+    cum_mean = [np.mean(all_xs[:i]) for i in progressions]
     cum_mean.append(np.mean(all_xs))
     cum_mean = np.array(cum_mean)
 
-    cum_std = [np.std(all_xs[:i]) for i in xrange(1, n_xs, n_xs // 100)]
+    cum_std = [np.std(all_xs[:i]) for i in progressions]
     cum_std.append(np.std(all_xs))
     cum_std = np.array(cum_std)
 
+    xs = progressions + [n_xs + 1]
+
     ax = ax or plt.gca()
-    p = ax.plot(cum_mean, xrange(cum_mean.shape[0]), label=label)
+    p = ax.plot(cum_mean, xs, label=label)
     # Credits: http://stackoverflow.com/a/36700159/5091738
-    ax.fill_betweenx(xrange(cum_mean.shape[0]),
+    ax.fill_betweenx(xs,
             cum_mean - cum_std, cum_mean + cum_std, alpha=0.3,
             facecolor=p[0].get_color())
 
@@ -207,10 +211,6 @@ def arrange_algo_full():
 
     return fig, ax
 
-# TODO: (RM 2017-03-03)
-# - Use actual time steps for the JSD and mean-std plots. This can be done by
-#   supplying an xs/ys array.
-# - Turn Jensen-Shannon around, so that it's aligned with the hist devel plots.
 
 # pylint: disable=too-many-arguments
 def load_plot_all(algo, algo_sub, interr01, ax, fig, data_dir_p):
