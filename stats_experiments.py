@@ -213,7 +213,8 @@ def arrange_algo_full():
 
 
 # pylint: disable=too-many-arguments
-def load_plot_all(algo, algo_sub, interr01, ax, fig, data_dir_p):
+def load_plot_all(algo, algo_sub, interr01, ax, fig, data_dir_p, clim=None,
+        clim2=None):
     with saveloaddata.load_res(algo + algo_sub, unintint[interr01],
             data_dir_p) as res:
         el = res[0]
@@ -223,15 +224,22 @@ def load_plot_all(algo, algo_sub, interr01, ax, fig, data_dir_p):
     before_cross = interruptibility.mask_after_cross(xs)
 
     mesh = plot_xss_cum_hist_devel(before_cross, ax.devel[interr01], bins=25)
+    if clim:
+        mesh.set_clim(clim)
     fig.colorbar(mesh, ax=ax.devel[interr01])
-    mesh = plot_xss_cum_hist_devel(before_cross, ax.devel2[interr01], bins=2)
-    fig.colorbar(mesh, ax=ax.devel2[interr01])
+    mesh2 = plot_xss_cum_hist_devel(before_cross, ax.devel2[interr01], bins=2)
+    if clim2:
+        mesh2.set_clim(clim2)
+    fig.colorbar(mesh2, ax=ax.devel2[interr01])
+
 
     plot_jsd_comp_final(before_cross, bins=25, ax=ax.jsd[interr01],
         label="25 bins")
     plot_jsd_comp_final(before_cross, bins=2, ax=ax.jsd[interr01],
         label="2 bins")
     ax.jsd[interr01].legend()
+    ax.jsd[interr01].set_xlim([1e-6, 0.06])
+    ax.jsd[interr01].set_xscale('log')
 
     plot_xs_hist(before_cross.compressed(), ax.hist, bins=25,
             label=unintint[interr01])
@@ -245,3 +253,5 @@ def load_plot_all(algo, algo_sub, interr01, ax, fig, data_dir_p):
 
     print "%10s %13s mean: %1.4f std: %1.4f" % \
         (algo, unintint[interr01], np.mean(before_cross), np.std(before_cross))
+
+    return mesh.get_clim(), mesh2.get_clim()
