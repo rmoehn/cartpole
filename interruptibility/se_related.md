@@ -1,3 +1,5 @@
+This section is copied from the old notebook.
+
 For general questions on why we need to align AI with human interests, see [1]
 and [6].
 

@@ -1,4 +1,4 @@
-In my first report I wrote as if I was sure of what I'd found. I even tried to
+In my old notebook I wrote as if I was sure of what I'd found. I even tried to
 hide flaws. I have learned better. In this report I do the opposite: I ask
 questions about what I found.
 
