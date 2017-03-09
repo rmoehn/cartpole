@@ -242,6 +242,7 @@ def load_plot_all(algo, algo_sub, interr01, ax, fig, data_dir_p, clim=None,
         label="2 bins")
     ax.jsd[interr01].legend()
     ax.jsd[interr01].set_xlim([1e-6, 0.06])
+    ax.jsd[interr01].set_ylim(ax.devel[interr01].get_ylim())
     ax.jsd[interr01].set_xscale('log')
 
     plot_xs_hist(before_cross.compressed(), ax.hist, bins=25,
