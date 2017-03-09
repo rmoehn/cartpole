@@ -18,8 +18,8 @@ terms) all time steps after a cross. Illustration:
               start                x-coordinate becomes 1.057
                ↓                        ↓
 interrupted:   **************************|
-                                       ↑
-                                    interruption, end of episode
+                                         ↑
+                                      interruption, end of episode
 
              start      0.991.041  0.89  1.44    end of episode
                ↓           ↓↓     ↓      ↓          ↓
@@ -33,18 +33,21 @@ case, the last time step before each interruption in the data is actually
 $>1.0$. I mask those, too.)
 
 
-## Sarsa(λ)
+### Sarsa(λ)
 
 My results consist mostly of plots derived from the observations. I will
-describe the plots for Sarsa(λ). The ones for Q-learning later are equivalent.
+describe the following plots for Sarsa(λ). The ones for Q-learning later are
+equivalent.
 
 Here the layout of the plots:
 
+```
 1   2
 4 5 6
 7 8 9
 10 11
  12
+```
 
 - 1, 2: *Reward development*. Development of rewards of the first ten training
   rounds for the uninterrupted (1) and interrupted (2) case. The lists of
@@ -64,7 +67,7 @@ Here the layout of the plots:
   old notebook where I counted time steps left of zero and right of zero. There,
   however, I made some mistakes and also didn't count time steps left of $-1.0$.
 
-- 4, 5, 7, 8: *Histrogram development*. Shows how the histograms from 10 and 11
+- 4, 5, 7, 8: *Histogram development*. Shows how the histograms from 10 and 11
   develop when we incorporate more and more data for the uninterrupted (4, 5)
   and interrupted (7, 8) case. Imagine you're looking at histogram 10 from above
   and the tops of columns are coloured according to their height. Then you take
@@ -84,3 +87,6 @@ Here the layout of the plots:
   steps. The line in the middle is the mean and the area is the mean +/- one
   standard deviation at that point. Time is going upwards, so that the x-axis is
   aligned with the cart-pole's x-axis.
+
+Above the plots there is also a numerical output of the mean and standard
+deviation over all time steps.

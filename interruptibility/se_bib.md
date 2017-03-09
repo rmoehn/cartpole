@@ -25,5 +25,6 @@ Dan Mané: Concrete Problems in AI Safety](https://arxiv.org/abs/1606.06565)
 Alignment for Advanced Machine Learning
 Systems](https://intelligence.org/2016/07/27/alignment-machine-learning/)
 
-[9] Richard Sutton, Andrew G. Barto: Reinforcement Learning: An Introduction.
-Draft of the 2nd ed. from October 2015.
+[9] [Richard Sutton, Andrew G. Barto: Reinforcement Learning: An Introduction.
+Draft of the 2nd ed. from October
+2015](http://webdocs.cs.ualberta.ca/~sutton/book/the-book-2nd.html)

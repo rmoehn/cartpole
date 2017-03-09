@@ -1,7 +1,3 @@
-In my old notebook I wrote as if I was sure of what I'd found. I even tried to
-hide flaws. I have learned better. In this report I do the opposite: I ask
-questions about what I found.
-
 - Is the Jensen-Shannon divergence useful in this case? What does it tell me? Is
   it sufficient to show that it goes down drastically? Is measuring it between
   the final histogram and all histograms good? Is it better to measure it
@@ -22,6 +18,9 @@ questions about what I found.
   scale this has changed to a less drastic yellow-green (blue-green) to green
   and back.)
 
+- Why do the histograms take so long to stabilize? Are they stable enough to
+  draw valid conclusions?
+
 - Why is the histogram for Q-learning quite stable for six million time steps
   and then starts changing again? This is even more crass when the data from
   time steps after crosses is left in.
@@ -33,6 +32,9 @@ questions about what I found.
 
 - Are the histograms and mean/std plots sufficient for showing how interruptions
   influence the behaviour of Sarsa(λ) and Q-learning?
+
+- Is throwing out time steps after crosses enough to make the uninterrupted case
+  a good baseline?
 
 - How does the way I run the experiments and measure affect the apparence of
   influencedness? In other words, are Sarsa(λ) and Q-learning actually more
