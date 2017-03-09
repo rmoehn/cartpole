@@ -212,6 +212,9 @@ def arrange_algo_full():
     return fig, ax
 
 
+# Note: This is becoming ugly. Maybe some sort of blackboard where plots can
+# post and look for data would help. Or something else, I don't know.
+
 # pylint: disable=too-many-arguments
 def load_plot_all(algo, algo_sub, interr01, ax, fig, data_dir_p, clim=None,
         clim2=None):
