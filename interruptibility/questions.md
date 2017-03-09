@@ -38,12 +38,13 @@
 
 - How does the way I run the experiments and measure affect the apparence of
   influencedness? In other words, are Sarsa(λ) and Q-learning actually more
-  influence-resistent (interruptible) than I make them seem?
+  influence-resistent (interruptible) than I make them appear?
 
-- Why do the graphs of the means for Q-learning look so similar?
+- Why do the graphs of the means for Q-learning look so similar? Surely their
+  trajectories should be independent.
 
-- Why is the difference between the means (uninterrupted/interrupted) fairly
-  similar to the difference between standard deviations?
+- Why is the difference between the means (uninterrupted/interrupted) close to
+  equal to the difference between standard deviations?
 
 - Why is the variance almost constant over time?
 

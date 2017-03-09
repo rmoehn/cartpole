@@ -16,8 +16,8 @@ Sarsa(λ) and
 Q-Learning](https://nbviewer.jupyter.org/github/rmoehn/cartpole/blob/master/notebooks/ProcessedOSCP.ipynb)
 (referred to as the ‘old notebook’ throughout the text). In that old notebook I
 wrote as if I was sure of what I'd found. I ignored that my experiments yielded
-quite different numbers on every run. And there were some flaws in the method
-that Stuart Armstrong and Patrick LaVictoire pointed out. For this notebook I
+quite different numbers on every run. And there were some flaws in the method,
+which Stuart Armstrong and Patrick LaVictoire pointed out. For this notebook I
 eliminated those flaws (other flaws might be remaining), used ten times as much
 data, more expressive measures and illustrations. And I mostly don't draw
 conclusions, but ask questions, because questions are all I can confidently
