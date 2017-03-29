@@ -26,6 +26,9 @@ def choose_greedy(e, o):
                 key=operator.itemgetter(0))
 
 
+# Note: This does not follow the definition of an epsi-greedy strategy given in
+# Sutton & Barto, 09/2016, p. 127. There, epsi is divided by the number of
+# available actions.
 def choose_action_Q(e, o):
     g_Q, g_a, g_feat = choose_greedy(e, o)
 
