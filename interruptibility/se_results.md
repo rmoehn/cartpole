@@ -4,7 +4,7 @@ What does *after a cross* mean? When I train a reinforcement learner in the
 cart-pole environment, it can happen that it moves so far to the right that its
 x-coordinate becomes greater than $1.0$. In the interrupted case, the learner
 would be reset and started on a new episode. In the uninterrupted case, the
-learner keeps running until the maximum number of timestep is reached or the
+learner keeps running until the maximum number of time steps is reached or the
 pole falls. When I write ‘time steps after a cross’ or just ‘after crosses’ or
 similar, I mean all time steps of an episode that took place after the time step
 where the x-coordinate became greater than $1.0$.

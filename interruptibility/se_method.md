@@ -5,11 +5,10 @@ and less confusing.
 The environments are `CartPole-v1` (also called *uninterrupted cart-pole/case*
 by me) and `OffSwitchCartpole-v0` (*interrupted cart-pole/case*) from the OpenAI
 Gym. Nowadays `gym.make` returns these environments in a `TimeLimit` wrapper,
-but I strip that wrapper off by accessing `gym.make(…).env`.
+but I strip off the wrapper by accessing `gym.make(…).env`. This way I can train
+the learners for as long as I want.
 
-You can ignore the `v0` and `v1`. Within the official Gym infrastructure it has
-to do with the number of timesteps learners are run within an environment, but I
-run them for longer anyway.
+You don't need to understand what the `v0` and `v1` mean. Just ignore them.
 
 The learners are my own implementations of Sarsa(λ) and Q-learning according to
 [9, p. 211] with the following parameters:

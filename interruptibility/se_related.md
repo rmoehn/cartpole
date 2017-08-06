@@ -31,6 +31,6 @@ scheme. (I don't understand the paper completely, so my statements about it
 might be inaccurate.)
 
 We see that possible solutions to the problem of interruptibility are still
-fairly theoretical and not applicable to real-world RL systems. What we can do
-practically is observe how RL algorithms actually react to interruptions. In
-this notebook I present such an observation.
+theoretical and not applicable to real-world RL systems. However, we can already
+observe how RL algorithms actually react to interruptions. In this notebook I
+present such an observation.
