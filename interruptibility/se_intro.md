@@ -1,6 +1,6 @@
 We want to align AI with human interests. Reinforcement learning (RL) algorithms
 are a class of AI. The OpenAI Gym has [several
-adaptations](https://gym.openai.com/envs#safety) of classic RL environments that
+adaptations](https://gym.openai.com/envs#safety)\* of classic RL environments that
 allow us to observe AI alignment-related properties of RL algorithms. One such
 property is the response to interruptions. One environment to observe this in is
 the [`OffSwitchCartpole`](https://gym.openai.com/envs/OffSwitchCartpole-v0). In
@@ -20,10 +20,13 @@ was writing as if I was sure of what I'd found. I ignored that my experiments
 yielded quite different numbers on every run. And there were flaws in the
 method, which Stuart Armstrong and Patrick LaVictoire pointed out. For this new
 notebook I eliminated those flaws (other flaws might be remaining), used ten
-times as much data, more expressive measures and illustrations. And I mostly
+times as much data, more expressive metrics and illustrations. And I mostly
 don't draw conclusions, but ask questions, because questions are all I can
 confidently derive from my experiments.
 
 (Note: When you see the section headings in this notebook, you might think that
 I was trying to produce a proper academic publication. This is not so. Such a
 framework just makes writing easier.)
+
+\* Edit 2018-05-19: Apparently the OpenAI Gym safety environments are gone from the
+website.
